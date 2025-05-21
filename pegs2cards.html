@@ -26,11 +26,30 @@
       font-size: 18px;
       margin-top: 10px;
     }
+
+    .top-left-nav {
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    .top-left-nav a {
+      text-decoration: none;
+      font-size: 24px;
+      padding: 4px 10px;
+      border: 1px solid #000;
+      border-radius: 6px;
+      background-color: #f9f9f9;
+      color: black;
+    }
+    
   </style>
 </head>
 <body>
 
-  <h1>Select Rank and Suit</h1>
+  <div class="top-left-nav">
+    <a href="index.html">🏠</a>
+  </div>
+
   <img id="cardImage" src="" alt="Card" />
   
   <div class="buttons" class="rankButtons">
@@ -101,7 +120,7 @@
         } else {
           document.getElementById('result').textContent = `❌`;
         }
-        setTimeout(loadNextCard, 3000); // Load next card after 2 seconds
+        setTimeout(loadNextCard, 2000);
       }
     }
 

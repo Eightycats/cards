@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mnemonic Flashcards</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+      background: #f0f0f0;
+      margin: 2rem;
+    }
+    img {
+      width: 200px;
+      margin: 20px 0;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+    }
+    #pegWord {
+      font-size: 24px;
+      margin: 10px 0;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      margin: 10px;
+    }
+    
+    .top-left-nav {
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    .top-left-nav a {
+      text-decoration: none;
+      font-size: 24px;
+      padding: 4px 10px;
+      border: 1px solid #000;
+      border-radius: 6px;
+      background-color: #f9f9f9;
+      color: black;
+    }
+    
+  </style>
+</head>
+<body>
+
+  <div class="top-left-nav">
+    <a href="index.html">🏠</a>
+  </div>
+
+  <img id="cardImage" src="" alt="Card Image" onclick="toggleFlipOrNext()">
+  <div id="pegWord"></div>
+  <div>
+    <button id="toggleButton" onclick="toggleFlipOrNext()">Flip</button>
+  </div>
+
+  <script>
+    const cards = {
+      "H2": "HoNey", "H3": "HoMe", "H4": "HaiRy/HaRe", "H5": "HooF", "H6": "HoBo",
+      "H7": "HaT", "H8": "HitCH", "H9": "HoG", "HT": "HorSe", "HJ": "Cupid", "HQ": "Bride", "HK": "Groom", "HA": "Heart",
+      "D2": "DoN", "D3": "DoM", "D4": "DooR", "D5": "DoVe", "D6": "DoPey", "D7": "DoT", "D8": "DiSH", "D9": "DoG", "DT": "DiZZy",
+      "DJ": "Ninja", "DQ": "The Queen", "DK": "Miner", "DA": "Diamond",
+      "C2": "CaN", "C3": "CoMb", "C4": "CoRe CaR", "C5": "CoFFee CaVe", "C6": "CoB", "C7": "CaT", "C8": "CaSH", "C9": "CoG",
+      "CT": "KiSS", "CJ": "Travolta", "CQ": "Sea Hag", "CK": "Elvis", "CA": "Giant Club",
+      "S2": "SuN", "S3": "SaM", "S4": "SoRe SiR", "S5": "SaFe", "S6": "SoaP", "S7": "SooTy SeaT", "S8": "SaSH", "S9": "CiGarette",
+      "ST": "SiSter", "SJ": "Boy with Spade", "SQ": "Maid", "SK": "Farmer", "SA": "Death"
+    };
+
+    const cardKeys = Object.keys(cards);
+    let currentCard = "";
+    let showingBack = false;
+
+    function getRandomCard() {
+      return cardKeys[Math.floor(Math.random() * cardKeys.length)];
+    }
+
+    function showHiddenCard(cardCode) {
+      document.getElementById("cardImage").src = `img/${cardCode}_hidden.png`;
+      document.getElementById("pegWord").textContent = "-----";
+      document.getElementById("toggleButton").textContent = "Flip";
+      showingBack = false;
+    }
+
+    function flipCard(cardCode) {
+      document.getElementById("cardImage").src = `img/${cardCode}.png`;
+      document.getElementById("pegWord").textContent = cards[cardCode];
+      document.getElementById("toggleButton").textContent = "Next";
+      showingBack = true;
+    }
+
+    function toggleFlipOrNext() {
+      if (!showingBack) {
+        flipCard(currentCard);
+      } else {
+        currentCard = getRandomCard();
+        showHiddenCard(currentCard);
+      }
+    }
+
+    // Initialize first card
+    currentCard = getRandomCard();
+    showHiddenCard(currentCard);
+  </script>
+
+</body>
+</html>

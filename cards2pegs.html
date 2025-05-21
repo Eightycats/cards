@@ -9,21 +9,44 @@
       text-align: center;
       padding: 20px;
     }
-    .card-display {
-      font-size: 48px;
+    .card-container {
+      justify-content: center;
+      gap: 10px;
+      max-width: 400px;
+    }
+    
+    .card {
+      display: inline-block;
+      height: 176px;
+      width: 126px;
+      text-align: center;
+      border: solid 1px #000000;
+      border-radius: 12px;
+      font-size: 42px;
+      font-family: Arial, Verdana, Geneva, sans-serif;
       margin-bottom: 20px;
+    }
+    .red {
+      margin-top: 68px;
+      color: #DD0000;
+    }
+    .black {
+      margin-top: 68px;
+      color: #000000;
     }
     .image-grid {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 10px;
+      max-width: 400px;
     }
     .card-option {
       border: 2px solid transparent;
       cursor: pointer;
       width: 80px;
       height: auto;
+      border-radius: 8px;
     }
     .card-option.correct {
       border-color: green;
@@ -35,19 +58,48 @@
       font-size: 20px;
       margin-top: 15px;
     }
+    
+    .top-left-nav {
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    .top-left-nav a {
+      text-decoration: none;
+      font-size: 24px;
+      padding: 4px 10px;
+      border: 1px solid #000;
+      border-radius: 6px;
+      background-color: #f9f9f9;
+      color: black;
+    }
+    
   </style>
 </head>
 <body>
+  <div class="top-left-nav">
+    <a href="index.html">🏠</a>
+  </div>
 
-  <h1>Guess the Mnemonic Image</h1>
-  <div class="card-display" id="cardDisplay"></div>
+  <div class="card-container">
+    <div class="card" id="cardDisplay">
+      <div id="cardText" class=""></div>
+    </div>
+    <div id="result">
+      <img id="correctImage" src="" style="display:none; width: 126px; margin-top: 10px;" />
+      <div id="feedbackText"></div>
+    </div>
+  </div>
+
   <div class="image-grid" id="imageOptions"></div>
-  <div id="result"></div>
+
+
 
   <script>
     const suits = ['S', 'H', 'D', 'C'];
     const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'];
     const suitEmojis = { 'S': '♠', 'H': '♥', 'D': '♦', 'C': '♣' };
+    const redSuits = ['H', 'D'];
     let currentCard = '';
 
     function getRandomCard(excludeList = []) {
@@ -63,13 +115,20 @@
     function displayCardText(cardCode) {
       const suit = cardCode[0];
       const rank = cardCode.slice(1);
-      return `${rank}${suitEmojis[suit]}`;
+      const cardText = `${rank}${suitEmojis[suit]}`;
+      const className = redSuits.includes(suit) ? 'red' : 'black';
+      const cardDisplay = document.getElementById('cardDisplay');
+      cardDisplay.style.display = 'inline-block';
+      const textDiv = document.getElementById('cardText');
+      textDiv.textContent = cardText;
+      textDiv.className = className;
     }
 
     function loadNextRound() {
       currentCard = getRandomCard();
-      document.getElementById('cardDisplay').textContent = displayCardText(currentCard);
-      document.getElementById('result').textContent = '';
+      displayCardText(currentCard);
+      document.getElementById('feedbackText').textContent = '';
+      document.getElementById('correctImage').src = '';
       
       const imageContainer = document.getElementById('imageOptions');
       imageContainer.innerHTML = '';
@@ -92,20 +151,29 @@
     }
 
     function handleSelection(img, isCorrect) {
-      const result = document.getElementById('result');
+      let resultText = document.getElementById('feedbackText');
+      let correctImage = document.getElementById('correctImage');
+    
       if (isCorrect) {
         img.classList.add('correct');
-        result.textContent = '✅';
+        resultText.textContent = '✅';
+        correctImage.style.display = 'none';
+        correctImage.src = '';
       } else {
         img.classList.add('incorrect');
-        result.textContent = `❌ Card was:  ${displayCardText(currentCard)}.`;
+        resultText.textContent = '❌';
+        const cardDisplay = document.getElementById('cardDisplay');
+        cardDisplay.style.display = 'none';
+        correctImage.src = `img/${currentCard}_hidden.png`;
+        correctImage.style.display = 'inline';
       }
-
+    
       const allOptions = document.querySelectorAll('.card-option');
-      allOptions.forEach(option => option.onclick = null); // Disable further clicks
-
+      allOptions.forEach(option => option.onclick = null);
+    
       setTimeout(loadNextRound, 2000);
     }
+
 
     // Start game
     loadNextRound();
@@ -113,4 +181,3 @@
 
 </body>
 </html>
-
