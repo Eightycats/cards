@@ -2,34 +2,53 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Mnemonic Card Trainer</title>
+  <title>Card Trainer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
       font-family: sans-serif;
       text-align: center;
-      padding: 50px;
+      padding: 20px;
+      margin: 0;
     }
+
     h1 {
-      margin-bottom: 40px;
+      margin-bottom: 30px;
+      font-size: 2em;
     }
+
     .menu {
       display: flex;
       flex-direction: column;
       gap: 15px;
-      max-width: 300px;
+      max-width: 90%;
+      width: 300px;
       margin: 0 auto;
     }
+
     .menu a {
       text-decoration: none;
-      font-size: 20px;
+      font-size: 1.2em;
       padding: 12px;
       border: 1px solid #000;
       border-radius: 8px;
       color: black;
       background-color: #f0f0f0;
     }
+
     .menu a:hover {
       background-color: #e0e0e0;
+    }
+
+    @media (max-width: 400px) {
+      h1 {
+        font-size: 1.5em;
+      }
+
+      .menu a {
+        font-size: 1em;
+        padding: 10px;
+      }
     }
   </style>
 </head>
@@ -39,10 +58,9 @@
   <div class="menu">
     <a href="cards.html">Cards</a>
     <a href="study.html">Study</a>
-    <a href="cards2pegs.html">Cards to  Pegs</>
+    <a href="cards2pegs.html">Cards to Pegs</a>
     <a href="pegs2cards.html">Pegs to Cards</a>
   </div>
 
 </body>
 </html>
-
