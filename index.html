@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <meta name="theme-color" content="#ffffff" />
   <title>Card Trainer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <style>
@@ -73,6 +76,8 @@
 </head>
 <body>
 
+
+
   <h1>Card Trainer</h1>
   <div class="menu">
     <a href="cards.html">Cards</a>
@@ -80,6 +85,15 @@
     <a href="cards2pegs.html">Cards ➝ Pegs</a>
     <a href="pegs2cards.html">Pegs ➝ Cards</a>
   </div>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").then(() =>
+      console.log("Service Worker Registered")
+    );
+  }
+</script>
+
 
 </body>
 </html>
