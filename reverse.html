@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reverse Card Mnemonic Game</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .card-display {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    .image-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+    .card-option {
+      border: 2px solid transparent;
+      cursor: pointer;
+      width: 80px;
+      height: auto;
+    }
+    .card-option.correct {
+      border-color: green;
+    }
+    .card-option.incorrect {
+      border-color: red;
+    }
+    #result {
+      font-size: 20px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Guess the Mnemonic Image</h1>
+  <div class="card-display" id="cardDisplay"></div>
+  <div class="image-grid" id="imageOptions"></div>
+  <div id="result"></div>
+
+  <script>
+    const suits = ['S', 'H', 'D', 'C'];
+    const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'];
+    const suitEmojis = { 'S': '♠', 'H': '♥', 'D': '♦', 'C': '♣' };
+    let currentCard = '';
+
+    function getRandomCard(excludeList = []) {
+      let card;
+      do {
+        const suit = suits[Math.floor(Math.random() * suits.length)];
+        const rank = ranks[Math.floor(Math.random() * ranks.length)];
+        card = suit + rank;
+      } while (excludeList.includes(card));
+      return card;
+    }
+
+    function displayCardText(cardCode) {
+      const suit = cardCode[0];
+      const rank = cardCode.slice(1);
+      return `${rank}${suitEmojis[suit]}`;
+    }
+
+    function loadNextRound() {
+      currentCard = getRandomCard();
+      document.getElementById('cardDisplay').textContent = displayCardText(currentCard);
+      document.getElementById('result').textContent = '';
+      
+      const imageContainer = document.getElementById('imageOptions');
+      imageContainer.innerHTML = '';
+
+      const options = new Set();
+      options.add(currentCard);
+      while (options.size < 8) {
+        options.add(getRandomCard([...options]));
+      }
+
+      const shuffled = Array.from(options).sort(() => Math.random() - 0.5);
+
+      for (let card of shuffled) {
+        const img = document.createElement('img');
+        img.src = `img/${card}_hidden.png`;
+        img.classList.add('card-option');
+        img.onclick = () => handleSelection(img, card === currentCard);
+        imageContainer.appendChild(img);
+      }
+    }
+
+    function handleSelection(img, isCorrect) {
+      const result = document.getElementById('result');
+      if (isCorrect) {
+        img.classList.add('correct');
+        result.textContent = '✅';
+      } else {
+        img.classList.add('incorrect');
+        result.textContent = `❌ Card was:  ${displayCardText(currentCard)}.`;
+      }
+
+      const allOptions = document.querySelectorAll('.card-option');
+      allOptions.forEach(option => option.onclick = null); // Disable further clicks
+
+      setTimeout(loadNextRound, 2000);
+    }
+
+    // Start game
+    loadNextRound();
+  </script>
+
+</body>
+</html>
+

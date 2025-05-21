@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Card Mnemonic Guess Game</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    img {
+      width: 200px;
+      height: auto;
+      margin: 20px 0;
+    }
+    .buttons {
+      margin: 10px 0;
+    }
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      font-size: 16px;
+    }
+    #result {
+      font-size: 18px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Select Rank and Suit</h1>
+  <img id="cardImage" src="" alt="Card" />
+  
+  <div class="buttons" class="rankButtons">
+    <button onclick="selectRank('A')">A</button>
+    <button onclick="selectRank('2')">2</button>
+    <button onclick="selectRank('3')">3</button>
+    <button onclick="selectRank('4')">4</button>
+    <button onclick="selectRank('5')">5</button>
+    <button onclick="selectRank('6')">6</button>
+    <button onclick="selectRank('7')">7</button>
+  </div>
+  
+    <div class="buttons" class="rankButtons">
+    <button onclick="selectRank('8')">8</button>
+    <button onclick="selectRank('9')">9</button>
+    <button onclick="selectRank('T')">10</button>
+    <button onclick="selectRank('J')">J</button>
+    <button onclick="selectRank('Q')">Q</button>
+    <button onclick="selectRank('K')">K</button>
+  </div>
+  
+  <div class="buttons" id="suitButtons">
+    <button onclick="selectSuit('H')">♥️</button>
+    <button onclick="selectSuit('S')">♠️</button>
+    <button onclick="selectSuit('D')">♦️</button>
+    <button onclick="selectSuit('C')">♣️</button>
+  </div>
+
+  <div id="result"></div>
+
+  <script>
+    const suits = ['S', 'H', 'D', 'C'];
+    const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'];
+    let currentCard = '';
+    let selectedSuit = '';
+    let selectedRank = '';
+
+    function getRandomCard() {
+      const suit = suits[Math.floor(Math.random() * suits.length)];
+      const rank = ranks[Math.floor(Math.random() * ranks.length)];
+      return suit + rank;
+    }
+
+    function loadNextCard() {
+      currentCard = getRandomCard();
+      selectedSuit = '';
+      selectedRank = '';
+      document.getElementById('cardImage').src = `img/${currentCard}_hidden.png`;
+      document.getElementById('result').textContent = '';
+    }
+
+    function selectSuit(suit) {
+      selectedSuit = suit;
+      checkGuess();
+    }
+
+    function selectRank(rank) {
+      selectedRank = rank;
+      checkGuess();
+    }
+
+    function checkGuess() {
+      if (selectedSuit && selectedRank) {
+        const guessedCard = selectedSuit + selectedRank;
+        document.getElementById('cardImage').src = `img/${currentCard}.png`;
+        if (guessedCard === currentCard) {
+          document.getElementById('result').textContent = '✅';
+        } else {
+          document.getElementById('result').textContent = `❌`;
+        }
+        setTimeout(loadNextCard, 3000); // Load next card after 2 seconds
+      }
+    }
+
+    // Start game
+    loadNextCard();
+  </script>
+
+</body>
+</html>
+
