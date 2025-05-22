@@ -5,44 +5,66 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pegs to Cards</title>
   <style>
-    body {
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
       font-family: sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-    img {
-      width: 200px;
-      height: auto;
-      margin: 20px 0;
-    }
-    .buttons {
-      margin: 10px 0;
-    }
-    button {
-      padding: 10px 15px;
-      margin: 5px;
-      font-size: 16px;
-    }
-    #result {
-      font-size: 18px;
-      margin-top: 10px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      box-sizing: border-box;
     }
 
     .top-left-nav {
+      width: 100%;
       text-align: left;
-      margin-bottom: 20px;
+      padding: 10px;
     }
 
     .top-left-nav a {
       text-decoration: none;
-      font-size: 24px;
-      padding: 4px 10px;
+      font-size: 20px;
+      padding: 6px 10px;
       border: 1px solid #000;
       border-radius: 6px;
       background-color: #f9f9f9;
       color: black;
     }
-    
+
+    #cardImage {
+      width: 200px;
+      height: auto;
+      margin: 8px 0;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      margin: 6px 0;
+      padding: 0 10px;
+    }
+
+    button {
+      padding: 8px 10px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      background-color: #f0f0f0;
+      min-width: 40px;
+      flex: 0 0 auto;
+    }
+
+    #result {
+      font-size: 20px;
+      height: 30px;
+      line-height: 30px;
+      margin: 4px 0;
+    }
   </style>
 </head>
 <body>
@@ -52,8 +74,8 @@
   </div>
 
   <img id="cardImage" src="" alt="Card" />
-  
-  <div class="buttons" class="rankButtons">
+
+  <div class="buttons">
     <button onclick="selectRank('A')">A</button>
     <button onclick="selectRank('2')">2</button>
     <button onclick="selectRank('3')">3</button>
@@ -63,7 +85,7 @@
     <button onclick="selectRank('7')">7</button>
   </div>
   
-    <div class="buttons" class="rankButtons">
+  <div class="buttons">
     <button onclick="selectRank('8')">8</button>
     <button onclick="selectRank('9')">9</button>
     <button onclick="selectRank('T')">10</button>
@@ -71,8 +93,8 @@
     <button onclick="selectRank('Q')">Q</button>
     <button onclick="selectRank('K')">K</button>
   </div>
-  
-  <div class="buttons" id="suitButtons">
+
+  <div class="buttons">
     <button onclick="selectSuit('H')">♥️</button>
     <button onclick="selectSuit('S')">♠️</button>
     <button onclick="selectSuit('D')">♦️</button>
@@ -116,19 +138,14 @@
       if (selectedSuit && selectedRank) {
         const guessedCard = selectedSuit + selectedRank;
         document.getElementById('cardImage').src = `img/${currentCard}.png`;
-        if (guessedCard === currentCard) {
-          document.getElementById('result').textContent = '✅';
-        } else {
-          document.getElementById('result').textContent = `❌`;
-        }
+        document.getElementById('result').textContent =
+          guessedCard === currentCard ? '✅' : '❌';
         setTimeout(loadNextCard, 2000);
       }
     }
 
-    // Start game
     loadNextCard();
   </script>
 
 </body>
 </html>
-
