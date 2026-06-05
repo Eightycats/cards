@@ -72,6 +72,34 @@
     .menu a:active {
       transform: scale(0.97);
     }
+
+    #install-btn {
+      display: none;
+      cursor: pointer;
+      border: none;
+      font-size: 1.2rem;
+      font-weight: 500;
+      padding: 16px;
+      border-radius: 12px;
+      background-color: var(--accent);
+      color: var(--text-color);
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: background-color 0.2s;
+      width: 100%;
+    }
+
+    #install-btn:hover { background-color: var(--accent-hover); }
+    #install-btn:active { transform: scale(0.97); }
+
+    #ios-hint {
+      display: none;
+      font-size: 0.9rem;
+      text-align: center;
+      color: var(--text-color);
+      opacity: 0.6;
+      padding: 8px 0 0;
+    }
   </style>
 </head>
 <body>
@@ -85,6 +113,8 @@
     <a href="study.html">Study</a>
     <a href="cards2pegs.html">Test: Cards ➝ Pegs</a>
     <a href="pegs2cards.html">Test: Pegs ➝ Cards</a>
+    <button id="install-btn">Install App</button>
+    <p id="ios-hint">To install: tap the Share button then "Add to Home Screen"</p>
   </div>
 
 <script>
@@ -92,6 +122,36 @@
     navigator.serviceWorker.register("sw.js").then(() =>
       console.log("Service Worker Registered")
     );
+  }
+
+  // Hide install UI if already running as installed PWA
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches
+    || window.navigator.standalone === true;
+
+  if (!isStandalone) {
+    let deferredPrompt;
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById("install-btn").style.display = "block";
+    });
+
+    document.getElementById("install-btn").addEventListener("click", async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") {
+        document.getElementById("install-btn").style.display = "none";
+      }
+      deferredPrompt = null;
+    });
+
+    // iOS Safari fallback (no beforeinstallprompt support)
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if (isIOS) {
+      document.getElementById("ios-hint").style.display = "block";
+    }
   }
 </script>
 
