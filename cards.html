@@ -47,6 +47,19 @@
       border: 1px solid #ccc;
     }
 
+    .card-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .card-label {
+      font-size: 12px;
+      text-align: center;
+      max-width: 100px;
+    }
+
     .hidden {
       display: none;
     }
@@ -91,14 +104,33 @@
     const suits = ['H', 'D', 'C', 'S'];
     const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'];
 
+    const cards = {
+      "H2": "HoNey", "H3": "HoMe", "H4": "HaiRy/HaRe", "H5": "HooF", "H6": "HoBo",
+      "H7": "HaT", "H8": "HitCH", "H9": "HoG", "HT": "HorSe", "HJ": "Cupid", "HQ": "Bride", "HK": "Groom", "HA": "Heart",
+      "D2": "DoN", "D3": "DoM", "D4": "DooR", "D5": "DoVe", "D6": "DoPey", "D7": "DoT", "D8": "DiSH", "D9": "DoG", "DT": "DiZZy",
+      "DJ": "Ninja", "DQ": "The Queen", "DK": "Miner", "DA": "Diamond",
+      "C2": "CaN", "C3": "CoMb", "C4": "CoRe CaR", "C5": "CoFFee CaVe", "C6": "CoB", "C7": "CaT", "C8": "CaSH", "C9": "CoG",
+      "CT": "KiSS", "CJ": "Travolta", "CQ": "Sea Hag", "CK": "Elvis", "CA": "Giant Club",
+      "S2": "SuN", "S3": "SaM", "S4": "SoRe SiR", "S5": "SaFe", "S6": "SoaP", "S7": "SooTy SeaT", "S8": "SaSH", "S9": "CiGarette",
+      "ST": "SiSter", "SJ": "Boy with Spade", "SQ": "Maid", "SK": "Farmer", "SA": "Death"
+    };
+
     function loadCards() {
       for (const suit of suits) {
         const container = document.getElementById(`cards-${suit}`);
         for (const rank of ranks) {
+          const code = `${suit}${rank}`;
+          const item = document.createElement('div');
+          item.className = 'card-item';
           const img = document.createElement('img');
-          img.src = `img/${suit}${rank}.png`;
-          img.alt = `${suit}${rank}`;
-          container.appendChild(img);
+          img.src = `img/${code}.png`;
+          img.alt = code;
+          const label = document.createElement('div');
+          label.className = 'card-label';
+          label.textContent = cards[code] || '';
+          item.appendChild(img);
+          item.appendChild(label);
+          container.appendChild(item);
         }
       }
     }

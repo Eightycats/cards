@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How the Mnemonics Work</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg2: #f5f5f5;
+      --text: #111111;
+      --muted: #666666;
+      --border: #dddddd;
+      --accent: #e8e8e8;
+      --highlight: #fff8e1;
+      --highlight-border: #f0c040;
+      --suit-h: #cc0000;
+      --suit-d: #cc0000;
+      --suit-c: #111111;
+      --suit-s: #111111;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1a1a;
+        --bg2: #252525;
+        --text: #eeeeee;
+        --muted: #999999;
+        --border: #3a3a3a;
+        --accent: #2e2e2e;
+        --highlight: #2a2510;
+        --highlight-border: #b08000;
+        --suit-h: #ff6666;
+        --suit-d: #ff6666;
+        --suit-c: #cccccc;
+        --suit-s: #cccccc;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0 16px 40px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      max-width: 680px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .top-nav {
+      padding: 12px 0;
+      margin-bottom: 8px;
+    }
+
+    .top-nav a {
+      text-decoration: none;
+      font-size: 20px;
+      padding: 6px 10px;
+      border: 1px solid var(--text);
+      border-radius: 6px;
+      background: var(--accent);
+      color: var(--text);
+    }
+
+    h1 {
+      font-size: 1.7rem;
+      margin: 16px 0 6px;
+    }
+
+    h2 {
+      font-size: 1.15rem;
+      margin: 32px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    p {
+      line-height: 1.6;
+      margin: 8px 0 12px;
+      color: var(--text);
+    }
+
+    .intro {
+      background: var(--highlight);
+      border-left: 4px solid var(--highlight-border);
+      border-radius: 4px;
+      padding: 12px 16px;
+      margin: 16px 0 24px;
+      line-height: 1.6;
+    }
+
+    /* Suit pills */
+    .suits {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 12px 0 24px;
+    }
+
+    .suit-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      background: var(--bg2);
+    }
+
+    .suit-symbol {
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .suit-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .suit-rule {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    .hearts, .diamonds { color: var(--suit-h); }
+    .clubs, .spades { color: var(--suit-c); }
+
+    /* Rank table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 24px;
+      font-size: 0.92rem;
+    }
+
+    thead th {
+      background: var(--accent);
+      padding: 8px 10px;
+      text-align: left;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      border-bottom: 2px solid var(--border);
+    }
+
+    tbody tr:nth-child(even) {
+      background: var(--bg2);
+    }
+
+    tbody td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .rank-badge {
+      display: inline-block;
+      font-size: 1rem;
+      font-weight: 700;
+      min-width: 28px;
+      text-align: center;
+    }
+
+    .sound-badge {
+      display: inline-block;
+      font-family: monospace;
+      font-size: 0.95rem;
+      font-weight: 700;
+      background: var(--accent);
+      border-radius: 4px;
+      padding: 1px 6px;
+    }
+
+    .examples {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .highlight-letter {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    /* Memory aid for why each rank has that sound */
+    .memory-aid {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* Royals section */
+    .royals-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: 12px 0 24px;
+    }
+
+    .royal-suit-col {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .royal-suit-header {
+      font-size: 1.3rem;
+      text-align: center;
+      padding: 8px 4px;
+      background: var(--accent);
+      font-weight: 600;
+    }
+
+    .royal-row {
+      padding: 6px 8px;
+      border-top: 1px solid var(--border);
+      font-size: 0.82rem;
+      line-height: 1.4;
+    }
+
+    .royal-rank {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    .royal-name {
+      font-weight: 500;
+    }
+
+    @media (max-width: 440px) {
+      .royals-grid { grid-template-columns: repeat(2, 1fr); }
+      .suits { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-nav">
+    <a href="index.html">🏠</a>
+  </div>
+
+  <h1>How This Works</h1>
+
+  <div class="intro">
+    Each card has a unique word associated with it. 
+    These names (and the associated image) makes the card easier to picture and remember. 
+    Each card's name includes two sounds. The Suit defines the first letter or sound.
+    The next sound is determined by the card's Rank (except for face cards, which are special).
+    An entire deck of cards can be remembered by creating a story in your mind: 
+    The cat chases the bride who throws her flowers to Elvis...
+  </div>
+
+  <h2>Suits</h2>
+
+  <div class="suits">
+    <div class="suit-card">
+      <div class="suit-symbol hearts">♥</div>
+      <div class="suit-label">Hearts</div>
+      <div class="suit-rule hearts">H sound</div>
+    </div>
+    <div class="suit-card">
+      <div class="suit-symbol diamonds">♦</div>
+      <div class="suit-label">Diamonds</div>
+      <div class="suit-rule diamonds">D sound</div>
+    </div>
+    <div class="suit-card">
+      <div class="suit-symbol clubs">♣</div>
+      <div class="suit-label">Clubs</div>
+      <div class="suit-rule clubs">C / K sound</div>
+    </div>
+    <div class="suit-card">
+      <div class="suit-symbol spades">♠</div>
+      <div class="suit-label">Spades</div>
+      <div class="suit-rule spades">S sound</div>
+    </div>
+  </div>
+
+  <h2>Ranks</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Sound</th>
+        <th>Reminder</th>
+        <th>Examples</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="rank-badge">2</span></td>
+        <td><span class="sound-badge">N</span></td>
+        <td class="memory-aid">N has 2 downstrokes</td>
+        <td class="examples">
+          Ho<span class="highlight-letter">N</span>ey &nbsp;
+          Do<span class="highlight-letter">N</span> &nbsp;
+          Ca<span class="highlight-letter">N</span> &nbsp;
+          Su<span class="highlight-letter">N</span>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge">3</span></td>
+        <td><span class="sound-badge">M</span></td>
+        <td class="memory-aid">M has three humps</td>
+        <td class="examples">
+          Ho<span class="highlight-letter">M</span>e &nbsp;
+          Do<span class="highlight-letter">M</span> &nbsp;
+          Co<span class="highlight-letter">M</span>b &nbsp;
+          Sa<span class="highlight-letter">M</span>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge">4</span></td>
+        <td><span class="sound-badge">R</span></td>
+        <td class="memory-aid">fou<strong>R</strong> ends in R</td>
+        <td class="examples">
+          Hai<span class="highlight-letter">R</span>y &nbsp;
+          Doo<span class="highlight-letter">R</span> &nbsp;
+          Co<span class="highlight-letter">R</span>e &nbsp;
+          So<span class="highlight-letter">R</span>e Si<span class="highlight-letter">R</span>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge">5</span></td>
+        <td><span class="sound-badge">F / V</span></td>
+        <td class="memory-aid">fi<strong>V</strong>e</td>
+        <td class="examples">
+          Hoo<span class="highlight-letter">F</span> &nbsp;
+          Do<span class="highlight-letter">V</span>e &nbsp;
+          Co<span class="highlight-letter">FF</span>ee &nbsp;
+          Sa<span class="highlight-letter">F</span>e
+        </td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge">6</span></td>
+        <td><span class="sound-badge">B / P</span></td>
+        <td class="memory-aid">6 looks like b</td>
+        <td class="examples">
+          Ho<span class="highlight-letter">B</span>o &nbsp;
+          Do<span class="highlight-letter">P</span>ey &nbsp;
+          Co<span class="highlight-letter">B</span> &nbsp;
+          Soa<span class="highlight-letter">P</span>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge">7</span></td>
+        <td><span class="sound-badge">T</span></td>
+        <td class="memory-aid">7 looks like a T</td>
+        <td class="examples">
+          Ha<span class="highlight-letter">T</span> &nbsp;
+          Do<span class="highlight-letter">T</span> &nbsp;
+          Ca<span class="highlight-letter">T</span> &nbsp;
+          Soo<span class="highlight-letter">T</span>y Sea<span class="highlight-letter">T</span>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge">8</span></td>
+        <td><span class="sound-badge">SH / CH</span></td>
+        <td class="memory-aid">the 8 curves like an S</td>
+        <td class="examples">
+          Hit<span class="highlight-letter">CH</span> &nbsp;
+          Di<span class="highlight-letter">SH</span> &nbsp;
+          Ca<span class="highlight-letter">SH</span> &nbsp;
+          Sa<span class="highlight-letter">SH</span>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge">9</span></td>
+        <td><span class="sound-badge">G</span></td>
+        <td class="memory-aid">9 looks like a lowercase g</td>
+        <td class="examples">
+          Ho<span class="highlight-letter">G</span> &nbsp;
+          Do<span class="highlight-letter">G</span> &nbsp;
+          Co<span class="highlight-letter">G</span> &nbsp;
+          Ci<span class="highlight-letter">G</span>arette
+        </td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge">10</span></td>
+        <td><span class="sound-badge">S / Z</span></td>
+        <td class="memory-aid">zzzero</td>
+        <td class="examples">
+          Hor<span class="highlight-letter">S</span>e &nbsp;
+          Di<span class="highlight-letter">ZZ</span>y &nbsp;
+          Ki<span class="highlight-letter">SS</span> &nbsp;
+          Si<span class="highlight-letter">S</span>ter
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Face Cards &amp; Aces</h2>
+  
+  <div class="royals-grid">
+    <div class="royal-suit-col">
+      <div class="royal-suit-header hearts">♥</div>
+      <div class="royal-row">
+        <div class="royal-rank">Jack</div>
+        <div class="royal-name">Cupid</div>
+      </div>
+      <div class="royal-row">
+        <div class="royal-rank">Queen</div>
+        <div class="royal-name">Bride</div>
+      </div>
+      <div class="royal-row">
+        <div class="royal-rank">King</div>
+        <div class="royal-name">Groom</div>
+      </div>
+      <div class="royal-row">
+        <div class="royal-rank">Ace</div>
+        <div class="royal-name">Heart</div>
+      </div>
+    </div>
+
+    <div class="royal-suit-col">
+      <div class="royal-suit-header diamonds">♦</div>
+      <div class="royal-row">
+        <div class="royal-rank">Jack</div>
+        <div class="royal-name">Ninja</div>
+      </div>
+      <div class="royal-row">
+        <div class="royal-rank">Queen</div>
+        <div class="royal-name">The Queen</div>
+      </div>
+      <div class="royal-row">
+        <div class="royal-rank">King</div>
+        <div class="royal-name">Miner</div>
+      </div>
+      <div class="royal-row">
+        <div class="royal-rank">Ace</div>
+        <div class="royal-name">Diamond</div>
+      </div>
+    </div>
+
+    <div class="royal-suit-col">
+      <div class="royal-suit-header clubs">♣</div>
+      <div class="royal-row">
+        <div class="royal-rank">Jack</div>
+        <div class="royal-name">Travolta</div>
+      </div>
+      <div class="royal-row">
+        <div class="royal-rank">Queen</div>
+        <div class="royal-name">Sea Hag</div>
+      </div>
+      <div class="royal-row">
+        <div class="royal-rank">King</div>
+        <div class="royal-name">Elvis</div>
+      </div>
+      <div class="royal-row">
+        <div class="royal-rank">Ace</div>
+        <div class="royal-name">Giant Club</div>
+      </div>
+    </div>
+
+    <div class="royal-suit-col">
+      <div class="royal-suit-header spades">♠</div>
+      <div class="royal-row">
+        <div class="royal-rank">Jack</div>
+        <div class="royal-name">Boy w/ Spade</div>
+      </div>
+      <div class="royal-row">
+        <div class="royal-rank">Queen</div>
+        <div class="royal-name">Maid</div>
+      </div>
+      <div class="royal-row">
+        <div class="royal-rank">King</div>
+        <div class="royal-name">Farmer</div>
+      </div>
+      <div class="royal-row">
+        <div class="royal-rank">Ace</div>
+        <div class="royal-name">Death</div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
