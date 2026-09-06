@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How the Number Pegs Work</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg2: #f5f5f5;
+      --text: #111111;
+      --muted: #666666;
+      --border: #dddddd;
+      --accent: #e8e8e8;
+      --highlight: #fff8e1;
+      --highlight-border: #f0c040;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1a1a;
+        --bg2: #252525;
+        --text: #eeeeee;
+        --muted: #999999;
+        --border: #3a3a3a;
+        --accent: #2e2e2e;
+        --highlight: #2a2510;
+        --highlight-border: #b08000;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 50px 16px 40px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      max-width: 680px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    h1 { font-size: 1.7rem; margin: 16px 0 6px; }
+
+    h2 {
+      font-size: 1.15rem;
+      margin: 32px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    p { line-height: 1.6; margin: 8px 0 12px; }
+
+    .intro {
+      background: var(--highlight);
+      border-left: 4px solid var(--highlight-border);
+      border-radius: 4px;
+      padding: 12px 16px;
+      margin: 16px 0 24px;
+      line-height: 1.6;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 24px;
+      font-size: 0.92rem;
+    }
+
+    thead th {
+      background: var(--accent);
+      padding: 8px 10px;
+      text-align: left;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      border-bottom: 2px solid var(--border);
+    }
+
+    tbody tr:nth-child(even) { background: var(--bg2); }
+
+    tbody td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .rank-badge {
+      display: inline-block;
+      font-size: 1rem;
+      font-weight: 700;
+      min-width: 28px;
+      text-align: center;
+    }
+
+    .sound-badge {
+      display: inline-block;
+      font-family: monospace;
+      font-size: 0.95rem;
+      font-weight: 700;
+      background: var(--accent);
+      border-radius: 4px;
+      padding: 1px 6px;
+    }
+
+    .examples {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .highlight-letter {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .memory-aid {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .example-box {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 8px 0;
+    }
+
+    .example-box .num {
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .example-box .breakdown {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>How Number Pegs Work</h1>
+
+  <div class="intro">
+    The Major System converts numbers into consonant sounds, which you then turn into memorable words.
+    Each digit 0-9 maps to a specific consonant sound. Vowels and the letters W, H, Y don't count &mdash;
+    they're just filler to make real words. Two-digit numbers use two consonant sounds combined into one word.
+  </div>
+
+  <h2>Digit-to-Sound Table</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Digit</th>
+        <th>Sound</th>
+        <th>Reminder</th>
+        <th>Examples</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="rank-badge">0</span></td>
+        <td><span class="sound-badge">S / Z</span></td>
+        <td class="memory-aid">Zero starts with Z</td>
+        <td class="examples"><span class="highlight-letter">Z</span>oo</td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge">1</span></td>
+        <td><span class="sound-badge">L</span></td>
+        <td class="memory-aid">Lowercase l looks like a 1. L has 1 downstroke</td>
+        <td class="examples">a<span class="highlight-letter">L</span>e, <span class="highlight-letter">L</span>i<span class="highlight-letter">L</span>y</td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge">2</span></td>
+        <td><span class="sound-badge">N</span></td>
+        <td class="memory-aid">N has 2 downstrokes</td>
+        <td class="examples">he<span class="highlight-letter">N</span>, <span class="highlight-letter">N</span>o<span class="highlight-letter">S</span>e (20)</td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge">3</span></td>
+        <td><span class="sound-badge">M</span></td>
+        <td class="memory-aid">M has 3 humps</td>
+        <td class="examples">ha<span class="highlight-letter">M</span>, <span class="highlight-letter">M</span>a<span class="highlight-letter">Z</span>e (30)</td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge">4</span></td>
+        <td><span class="sound-badge">R</span></td>
+        <td class="memory-aid">fouR ends in R</td>
+        <td class="examples">oa<span class="highlight-letter">R</span>, <span class="highlight-letter">R</span>o<span class="highlight-letter">S</span>e (40)</td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge">5</span></td>
+        <td><span class="sound-badge">F / V</span></td>
+        <td class="memory-aid">fiVe</td>
+        <td class="examples">hi<span class="highlight-letter">V</span>e, <span class="highlight-letter">F</span>u<span class="highlight-letter">S</span>e (50)</td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge">6</span></td>
+        <td><span class="sound-badge">B / P</span></td>
+        <td class="memory-aid">6 looks like b</td>
+        <td class="examples"><span class="highlight-letter">B</span>ee, <span class="highlight-letter">B</span>u<span class="highlight-letter">S</span> (60)</td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge">7</span></td>
+        <td><span class="sound-badge">T / D</span></td>
+        <td class="memory-aid">7 looks like a T</td>
+        <td class="examples"><span class="highlight-letter">T</span>ea, <span class="highlight-letter">T</span>oe<span class="highlight-letter">S</span> (70)</td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge">8</span></td>
+        <td><span class="sound-badge">SH / CH</span></td>
+        <td class="memory-aid">8 on its side looks like a chain</td>
+        <td class="examples"><span class="highlight-letter">SH</span>oe, <span class="highlight-letter">CH</span>ee<span class="highlight-letter">S</span>e (80)</td>
+      </tr>
+      <tr>
+        <td><span class="rank-badge">9</span></td>
+        <td><span class="sound-badge">G / K</span></td>
+        <td class="memory-aid">9 looks like a g</td>
+        <td class="examples"><span class="highlight-letter">G</span>oo, <span class="highlight-letter">G</span>oo<span class="highlight-letter">S</span>e (90)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>How Two-Digit Numbers Work</h2>
+  <p>For two-digit numbers, the tens digit gives the first consonant sound and the ones digit gives the second. Vowels are added to form a real word.</p>
+
+  <div class="example-box">
+    <div class="num">42 &rarr; RaiN</div>
+    <div class="breakdown">4 = R, 2 = N &rarr; R_N &rarr; RaiN</div>
+  </div>
+
+  <div class="example-box">
+    <div class="num">67 &rarr; BoaT</div>
+    <div class="breakdown">6 = B, 7 = T &rarr; B_T &rarr; BoaT</div>
+  </div>
+
+  <div class="example-box">
+    <div class="num">85 &rarr; CHeF</div>
+    <div class="breakdown">8 = CH, 5 = F &rarr; CH_F &rarr; CHeF</div>
+  </div>
+
+  <h2>Single Digits (0-9)</h2>
+  <p>Single-digit numbers use just one consonant sound: 0 = <span class="highlight-letter">Z</span>oo, 1 = a<span class="highlight-letter">L</span>e, 7 = <span class="highlight-letter">T</span>ea, 9 = <span class="highlight-letter">G</span>oo.</p>
+
+  <h2>100</h2>
+  <p>100 uses three sounds: 1=L, 0=S, 0=S &rarr; <span class="highlight-letter">L</span>a<span class="highlight-letter">C</span>e<span class="highlight-letter">S</span></p>
+
+  <script src="nav.js"></script>
+</body>
+</html>

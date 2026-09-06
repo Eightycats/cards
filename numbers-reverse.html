@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz: Images to Numbers</title>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #000000;
+      --accent: #f0f0f0;
+      --accent-hover: #e0e0e0;
+      --border: #dddddd;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1e1e1e;
+        --text-color: #ffffff;
+        --accent: #333333;
+        --accent-hover: #444444;
+        --border: #3a3a3a;
+      }
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    .score {
+      margin-top: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    #quiz { text-align: center; }
+
+    #pegImage {
+      width: 160px;
+      height: 160px;
+      object-fit: contain;
+      margin: 10px 0;
+      border-radius: 10px;
+    }
+
+    .guess-display {
+      font-size: 2.5rem;
+      font-weight: 700;
+      min-height: 50px;
+      margin: 4px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #feedback {
+      font-size: 1.1rem;
+      min-height: 28px;
+      text-align: center;
+    }
+
+    .highlight-letter { font-weight: 700; }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      margin: 6px 0;
+      padding: 0 10px;
+    }
+
+    .btn-row button {
+      padding: 10px 12px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--accent);
+      color: var(--text-color);
+      min-width: 44px;
+      cursor: pointer;
+    }
+
+    .btn-row button:hover { background: var(--accent-hover); }
+    .btn-row button.selected { background: var(--accent-hover); font-weight: 700; }
+
+    .btn-label {
+      font-size: 0.75rem;
+      color: var(--text-color);
+      opacity: 0.5;
+      margin: 4px 0 2px;
+    }
+
+    .final-screen {
+      display: none;
+      text-align: center;
+      margin-top: 60px;
+    }
+
+    .final-screen .big-score {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 20px 0;
+    }
+
+    .final-screen button {
+      padding: 12px 30px;
+      font-size: 1.1rem;
+      border-radius: 10px;
+      border: 1px solid var(--text-color);
+      background: var(--accent);
+      color: var(--text-color);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="score" id="score">Score: 0/0</div>
+
+  <div id="quiz">
+    <img id="pegImage" src="" alt="Peg" />
+    <div class="guess-display" id="guessDisplay">?</div>
+    <div id="feedback"></div>
+
+    <div class="btn-label">Tens</div>
+    <div class="btn-row" id="tensRow"></div>
+
+    <div class="btn-label">Ones</div>
+    <div class="btn-row" id="onesRow"></div>
+  </div>
+
+  <div class="final-screen" id="finalScreen">
+    <div>Complete!</div>
+    <div class="big-score" id="finalScore"></div>
+    <button onclick="restartQuiz()">Restart</button>
+  </div>
+
+  <script src="numbers-data.js"></script>
+  <script>
+    let order = shuffleArray(numberList);
+    let idx = 0;
+    let correct = 0;
+    let total = 0;
+    let selectedTens = null;
+    let selectedOnes = null;
+    let answered = false;
+
+    function buildButtons() {
+      const tensRow = document.getElementById('tensRow');
+      const onesRow = document.getElementById('onesRow');
+      [0, 10, 20, 30, 40, 50, 60, 70, 80, 90].forEach(t => {
+        const btn = document.createElement('button');
+        btn.textContent = t;
+        btn.onclick = () => selectTens(t, btn);
+        tensRow.appendChild(btn);
+      });
+      for (let i = 0; i <= 9; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.onclick = () => selectOnes(i, btn);
+        onesRow.appendChild(btn);
+      }
+    }
+
+    function updateScore() {
+      document.getElementById('score').textContent = `Score: ${correct}/${total}`;
+    }
+
+    function loadRound() {
+      if (idx >= order.length) {
+        document.getElementById('quiz').style.display = 'none';
+        document.getElementById('finalScreen').style.display = 'block';
+        document.getElementById('finalScore').textContent = `${correct} / ${order.length} correct`;
+        return;
+      }
+
+      const current = order[idx];
+      document.getElementById('pegImage').src = getNumberImageSrc(current);
+      document.getElementById('guessDisplay').textContent = '?';
+      document.getElementById('feedback').innerHTML = '';
+      selectedTens = null;
+      selectedOnes = null;
+      answered = false;
+
+      // Reset button styles
+      document.querySelectorAll('.btn-row button').forEach(b => b.classList.remove('selected'));
+      enableButtons(true);
+    }
+
+    function enableButtons(on) {
+      document.querySelectorAll('.btn-row button').forEach(b => {
+        b.disabled = !on;
+      });
+    }
+
+    function selectTens(val, btn) {
+      if (answered) return;
+      selectedTens = val;
+      document.querySelectorAll('#tensRow button').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      updateGuessDisplay();
+      tryCheck();
+    }
+
+    function selectOnes(val, btn) {
+      if (answered) return;
+      selectedOnes = val;
+      document.querySelectorAll('#onesRow button').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      updateGuessDisplay();
+      tryCheck();
+    }
+
+    function updateGuessDisplay() {
+      const display = document.getElementById('guessDisplay');
+      if (selectedTens !== null && selectedOnes !== null) {
+        display.textContent = selectedTens + selectedOnes;
+      } else if (selectedTens !== null) {
+        display.textContent = (selectedTens / 10) + '_';
+      } else if (selectedOnes !== null) {
+        display.textContent = '_' + selectedOnes;
+      } else {
+        display.textContent = '?';
+      }
+    }
+
+    function tryCheck() {
+      const current = order[idx];
+
+      // For numbers < 10: only ones needed (no tens)
+      if (current < 10 && selectedOnes !== null && selectedTens === null) {
+        checkAnswer(selectedOnes, current);
+        return;
+      }
+
+      // For numbers >= 10: need both
+      if (selectedTens !== null && selectedOnes !== null) {
+        checkAnswer(selectedTens + selectedOnes, current);
+      }
+    }
+
+    function checkAnswer(guess, current) {
+      answered = true;
+      total++;
+      enableButtons(false);
+      document.getElementById('guessDisplay').textContent = current;
+
+      if (guess === current) {
+        correct++;
+        document.getElementById('feedback').textContent = '\u2705';
+      } else {
+        document.getElementById('feedback').innerHTML =
+          '\u274c ' + current + ' = ' + highlightConsonants(numberPegs[current]);
+      }
+      updateScore();
+
+      idx++;
+      setTimeout(loadRound, 2000);
+    }
+
+    function restartQuiz() {
+      order = shuffleArray(numberList);
+      idx = 0;
+      correct = 0;
+      total = 0;
+      updateScore();
+      document.getElementById('quiz').style.display = 'block';
+      document.getElementById('finalScreen').style.display = 'none';
+      loadRound();
+    }
+
+    buildButtons();
+    loadRound();
+  </script>
+  <script src="nav.js"></script>
+</body>
+</html>

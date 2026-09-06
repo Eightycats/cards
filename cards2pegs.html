@@ -112,9 +112,7 @@ html, body {
 
 </head>
 <body>
-  <div class="top-left-nav">
-    <a href="index.html">🏠</a>
-  </div>
+  <div id="scoreDisplay" style="position:fixed;top:10px;right:10px;font-size:14px;font-weight:600;z-index:999;">Score: 0/0</div>
 
     <div class="card-container">
       <div class="card" id="cardDisplay">
@@ -138,6 +136,12 @@ html, body {
     const suitEmojis = { 'S': '♠', 'H': '♥', 'D': '♦', 'C': '♣' };
     const redSuits = ['H', 'D'];
     let currentCard = '';
+    let scoreCorrect = 0;
+    let scoreTotal = 0;
+
+    function updateScore() {
+      document.getElementById('scoreDisplay').textContent = `Score: ${scoreCorrect}/${scoreTotal}`;
+    }
 
     function getRandomCard(excludeList = []) {
       let card;
@@ -199,7 +203,9 @@ function handleSelection(img, isCorrect) {
   const correctImage = document.getElementById('correctImage');
   const cardDisplay = document.getElementById('cardDisplay');
 
+  scoreTotal++;
   if (isCorrect) {
+    scoreCorrect++;
     img.classList.add('correct');
     resultText.textContent = '✅';
     correctImage.style.display = 'none';
@@ -211,6 +217,7 @@ function handleSelection(img, isCorrect) {
     correctImage.src = `img/${currentCard}_hidden.png`;
     correctImage.style.display = 'block';
   }
+  updateScore();
 
   const allOptions = document.querySelectorAll('.card-option');
   allOptions.forEach(option => option.onclick = null);
@@ -224,5 +231,6 @@ function handleSelection(img, isCorrect) {
     loadNextRound();
   </script>
 
+<script src="nav.js"></script>
 </body>
 </html>

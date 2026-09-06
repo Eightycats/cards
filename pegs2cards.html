@@ -69,9 +69,7 @@
 </head>
 <body>
 
-  <div class="top-left-nav">
-    <a href="index.html">🏠</a>
-  </div>
+  <div id="scoreDisplay" style="position:fixed;top:10px;right:10px;font-size:14px;font-weight:600;z-index:999;">Score: 0/0</div>
 
   <img id="cardImage" src="" alt="Card" />
 
@@ -109,6 +107,12 @@
     let currentCard = '';
     let selectedSuit = '';
     let selectedRank = '';
+    let scoreCorrect = 0;
+    let scoreTotal = 0;
+
+    function updateScore() {
+      document.getElementById('scoreDisplay').textContent = `Score: ${scoreCorrect}/${scoreTotal}`;
+    }
 
     function getRandomCard() {
       const suit = suits[Math.floor(Math.random() * suits.length)];
@@ -137,9 +141,12 @@
     function checkGuess() {
       if (selectedSuit && selectedRank) {
         const guessedCard = selectedSuit + selectedRank;
+        scoreTotal++;
+        const isCorrect = guessedCard === currentCard;
+        if (isCorrect) scoreCorrect++;
+        updateScore();
         document.getElementById('cardImage').src = `img/${currentCard}.png`;
-        document.getElementById('result').textContent =
-          guessedCard === currentCard ? '✅' : '❌';
+        document.getElementById('result').textContent = isCorrect ? '✅' : '❌';
         setTimeout(loadNextCard, 2000);
       }
     }
@@ -147,5 +154,6 @@
     loadNextCard();
   </script>
 
+<script src="nav.js"></script>
 </body>
 </html>
