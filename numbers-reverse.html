@@ -45,22 +45,46 @@
     #quiz { text-align: center; }
 
     #pegImage {
-      width: 160px;
-      height: 160px;
+      width: 220px;
+      height: 220px;
       object-fit: contain;
       margin: 10px 0;
       border-radius: 10px;
     }
 
     .guess-display {
-      font-size: 2.5rem;
-      font-weight: 700;
       min-height: 50px;
       margin: 4px 0;
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 8px;
     }
+
+    #answerInput {
+      font-size: 2rem;
+      font-weight: 700;
+      width: 80px;
+      text-align: center;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: var(--accent);
+      color: var(--text-color);
+      padding: 6px;
+    }
+
+    #goBtn {
+      font-size: 1.1rem;
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--accent);
+      color: var(--text-color);
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    #goBtn:hover { background: var(--accent-hover); }
 
     #feedback {
       font-size: 1.1rem;
@@ -93,13 +117,6 @@
     .btn-row button:hover { background: var(--accent-hover); }
     .btn-row button.selected { background: var(--accent-hover); font-weight: 700; }
 
-    .btn-label {
-      font-size: 0.75rem;
-      color: var(--text-color);
-      opacity: 0.5;
-      margin: 4px 0 2px;
-    }
-
     .final-screen {
       display: none;
       text-align: center;
@@ -128,14 +145,13 @@
 
   <div id="quiz">
     <img id="pegImage" src="" alt="Peg" />
-    <div class="guess-display" id="guessDisplay">?</div>
+    <div class="guess-display" id="guessDisplay">
+      <input type="text" id="answerInput" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="?" />
+      <button id="goBtn" onclick="submitAnswer()">Go</button>
+    </div>
     <div id="feedback"></div>
 
-    <div class="btn-label">Tens</div>
-    <div class="btn-row" id="tensRow"></div>
-
-    <div class="btn-label">Ones</div>
-    <div class="btn-row" id="onesRow"></div>
+    <div class="btn-row" id="digitRow"></div>
   </div>
 
   <div class="final-screen" id="finalScreen">
@@ -150,25 +166,45 @@
     let idx = 0;
     let correct = 0;
     let total = 0;
-    let selectedTens = null;
-    let selectedOnes = null;
     let answered = false;
 
+    const answerInput = document.getElementById('answerInput');
+
     function buildButtons() {
-      const tensRow = document.getElementById('tensRow');
-      const onesRow = document.getElementById('onesRow');
-      [0, 10, 20, 30, 40, 50, 60, 70, 80, 90].forEach(t => {
-        const btn = document.createElement('button');
-        btn.textContent = t;
-        btn.onclick = () => selectTens(t, btn);
-        tensRow.appendChild(btn);
-      });
+      const digitRow = document.getElementById('digitRow');
       for (let i = 0; i <= 9; i++) {
         const btn = document.createElement('button');
         btn.textContent = i;
-        btn.onclick = () => selectOnes(i, btn);
-        onesRow.appendChild(btn);
+        btn.onclick = () => appendDigit(i);
+        digitRow.appendChild(btn);
       }
+    }
+
+    function appendDigit(d) {
+      if (answered) return;
+      answerInput.value += d;
+      answerInput.focus();
+    }
+
+    // Only allow numeric input
+    answerInput.addEventListener('input', function() {
+      this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    // Submit on Enter key
+    answerInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submitAnswer();
+      }
+    });
+
+    function submitAnswer() {
+      if (answered) return;
+      const val = answerInput.value.trim();
+      if (val === '') return;
+      const guess = parseInt(val, 10);
+      checkAnswer(guess, order[idx]);
     }
 
     function updateScore() {
@@ -185,74 +221,29 @@
 
       const current = order[idx];
       document.getElementById('pegImage').src = getNumberImageSrc(current);
-      document.getElementById('guessDisplay').textContent = '?';
+      answerInput.value = '';
+      answerInput.placeholder = '?';
       document.getElementById('feedback').innerHTML = '';
-      selectedTens = null;
-      selectedOnes = null;
       answered = false;
 
-      // Reset button styles
-      document.querySelectorAll('.btn-row button').forEach(b => b.classList.remove('selected'));
       enableButtons(true);
+      answerInput.disabled = false;
+      answerInput.focus();
     }
 
     function enableButtons(on) {
-      document.querySelectorAll('.btn-row button').forEach(b => {
+      document.querySelectorAll('#digitRow button').forEach(b => {
         b.disabled = !on;
       });
-    }
-
-    function selectTens(val, btn) {
-      if (answered) return;
-      selectedTens = val;
-      document.querySelectorAll('#tensRow button').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      updateGuessDisplay();
-      tryCheck();
-    }
-
-    function selectOnes(val, btn) {
-      if (answered) return;
-      selectedOnes = val;
-      document.querySelectorAll('#onesRow button').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      updateGuessDisplay();
-      tryCheck();
-    }
-
-    function updateGuessDisplay() {
-      const display = document.getElementById('guessDisplay');
-      if (selectedTens !== null && selectedOnes !== null) {
-        display.textContent = selectedTens + selectedOnes;
-      } else if (selectedTens !== null) {
-        display.textContent = (selectedTens / 10) + '_';
-      } else if (selectedOnes !== null) {
-        display.textContent = '_' + selectedOnes;
-      } else {
-        display.textContent = '?';
-      }
-    }
-
-    function tryCheck() {
-      const current = order[idx];
-
-      // For numbers < 10: only ones needed (no tens)
-      if (current < 10 && selectedOnes !== null && selectedTens === null) {
-        checkAnswer(selectedOnes, current);
-        return;
-      }
-
-      // For numbers >= 10: need both
-      if (selectedTens !== null && selectedOnes !== null) {
-        checkAnswer(selectedTens + selectedOnes, current);
-      }
+      document.getElementById('goBtn').disabled = !on;
     }
 
     function checkAnswer(guess, current) {
       answered = true;
       total++;
       enableButtons(false);
-      document.getElementById('guessDisplay').textContent = current;
+      answerInput.disabled = true;
+      answerInput.value = current;
 
       if (guess === current) {
         correct++;
