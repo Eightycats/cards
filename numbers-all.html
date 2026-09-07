@@ -74,20 +74,6 @@
       border-radius: 6px;
     }
 
-    .num-card .placeholder {
-      width: 80px;
-      height: 80px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 4px 0;
-      background: var(--accent-hover);
-      border-radius: 6px;
-      font-size: 1.1rem;
-      color: var(--text-color);
-      opacity: 0.6;
-    }
-
     .num-card .peg-word {
       font-size: 0.8rem;
       text-align: center;
@@ -114,17 +100,10 @@
       numDiv.textContent = i;
       card.appendChild(numDiv);
 
-      if (i === 51) {
-        const ph = document.createElement('div');
-        ph.className = 'placeholder';
-        ph.innerHTML = highlightConsonants(numberPegs[51]);
-        card.appendChild(ph);
-      } else {
-        const img = document.createElement('img');
-        img.src = getNumberImageSrc(i);
-        img.alt = numberPegs[i];
-        card.appendChild(img);
-      }
+      const img = document.createElement('img');
+      img.src = getNumberImageSrc(i);
+      img.alt = numberPegs[i];
+      card.appendChild(img);
 
       const wordDiv = document.createElement('div');
       wordDiv.className = 'peg-word';

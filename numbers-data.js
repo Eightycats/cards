@@ -22,10 +22,9 @@ const numberPegs = {
   96: "GaP", 97: "GaTe", 98: "GuSH", 99: "GaG", 100: "LaCeS"
 };
 
-// All numbers that have images (exclude 51)
 const numberList = [0];
 for (let i = 1; i <= 100; i++) {
-  if (i !== 51) numberList.push(i);
+  numberList.push(i);
 }
 
 function shuffleArray(arr) {
