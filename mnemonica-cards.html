@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Mnemonica Cards</title>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #000000;
+      --accent: #f0f0f0;
+      --accent-hover: #e0e0e0;
+      --border: #dddddd;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1e1e1e;
+        --text-color: #ffffff;
+        --accent: #333333;
+        --accent-hover: #444444;
+        --border: #3a3a3a;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 50px 12px 40px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    h1 { text-align: center; font-size: 1.7rem; margin: 12px 0 20px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (max-width: 380px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .m-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--accent);
+      border-radius: 10px;
+      padding: 0;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .m-card .index-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      width: 100%;
+      padding: 6px 4px;
+      background: #444;
+      color: #fff;
+      border-radius: 10px 10px 0 0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .m-card .index-row {
+        background: #555;
+      }
+    }
+
+    .m-card .index {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .m-card .peg-img {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      border-radius: 6px;
+    }
+
+    .m-card .card-img {
+      width: 80px;
+      height: auto;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      margin: 8px 4px 6px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Mnemonica Cards</h1>
+  <div class="grid" id="grid"></div>
+
+  <script src="numbers-data.js"></script>
+  <script>
+    const mnemonicaOrder = [
+      'C4','H2','D7','C3','H4','D6','SA','H5','S9','S2',
+      'HQ','D3','CQ','H8','S6','S5','H9','CK','D2','HJ',
+      'S3','S8','H6','CT','D5','DK','C2','H3','D8','C5',
+      'SK','DJ','C8','ST','HK','CJ','S7','HT','DA','S4',
+      'H7','D4','CA','C9','SJ','DQ','C7','SQ','DT','C6',
+      'HA','D9'
+    ];
+
+    const grid = document.getElementById('grid');
+
+    mnemonicaOrder.forEach((code, i) => {
+      const pos = i + 1;
+
+      const el = document.createElement('div');
+      el.className = 'm-card';
+
+      // Index row: number + peg image side by side
+      const indexRow = document.createElement('div');
+      indexRow.className = 'index-row';
+
+      const indexDiv = document.createElement('div');
+      indexDiv.className = 'index';
+      indexDiv.textContent = pos;
+      indexRow.appendChild(indexDiv);
+
+      const pegImg = document.createElement('img');
+      pegImg.className = 'peg-img';
+      pegImg.src = getNumberImageSrc(pos);
+      pegImg.alt = numberPegs[pos];
+      indexRow.appendChild(pegImg);
+
+      el.appendChild(indexRow);
+
+      // Card image
+      const cardImg = document.createElement('img');
+      cardImg.className = 'card-img';
+      cardImg.src = `img/${code}.png`;
+      cardImg.alt = code;
+      el.appendChild(cardImg);
+
+      grid.appendChild(el);
+    });
+  </script>
+  <script src="nav.js"></script>
+</body>
+</html>
