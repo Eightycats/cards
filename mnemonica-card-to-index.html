@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Mnemonica: Card → Index</title>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #000000;
+      --accent: #f0f0f0;
+      --accent-hover: #e0e0e0;
+      --border: #dddddd;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1e1e1e;
+        --text-color: #ffffff;
+        --accent: #333333;
+        --accent-hover: #444444;
+        --border: #3a3a3a;
+      }
+    }
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      font-family: sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      display: flex; flex-direction: column; align-items: center;
+      overflow-x: hidden;
+    }
+    .score {
+      margin-top: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    #quiz { text-align: center; }
+    .card-area {
+      display: flex; flex-direction: column; align-items: center;
+      margin: 8px 0;
+    }
+    .card-area img {
+      width: 140px; height: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .card-label {
+      font-size: 1.5rem; font-weight: 700; margin-top: 4px;
+    }
+    .card-label.red { color: #DD0000; }
+    .card-label.black { color: var(--text-color); }
+    .guess-display {
+      min-height: 50px;
+      margin: 4px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    #answerInput {
+      font-size: 2rem;
+      font-weight: 700;
+      width: 80px;
+      text-align: center;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: var(--accent);
+      color: var(--text-color);
+      padding: 6px;
+    }
+    #goBtn {
+      font-size: 1.1rem;
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--accent);
+      color: var(--text-color);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    #goBtn:hover { background: var(--accent-hover); }
+    #feedback {
+      font-size: 1.1rem;
+      min-height: 28px;
+      text-align: center;
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      margin: 6px 0;
+      padding: 0 10px;
+    }
+    .btn-row button {
+      padding: 10px 12px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--accent);
+      color: var(--text-color);
+      min-width: 44px;
+      cursor: pointer;
+    }
+    .btn-row button:hover { background: var(--accent-hover); }
+    .final-screen {
+      display: none;
+      text-align: center;
+      margin-top: 60px;
+    }
+    .final-screen .big-score {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 20px 0;
+    }
+    .final-screen button {
+      padding: 12px 30px;
+      font-size: 1.1rem;
+      border-radius: 10px;
+      border: 1px solid var(--text-color);
+      background: var(--accent);
+      color: var(--text-color);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="score" id="score">Score: 0/0</div>
+
+  <div id="quiz">
+    <div class="card-area">
+      <img id="cardImg" src="" />
+      <div class="card-label" id="cardLabel"></div>
+    </div>
+    <div class="guess-display">
+      <input type="text" id="answerInput" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="?" />
+      <button id="goBtn" onclick="submitAnswer()">Go</button>
+    </div>
+    <div id="feedback"></div>
+    <div class="btn-row" id="digitRow"></div>
+  </div>
+
+  <div class="final-screen" id="finalScreen">
+    <div>Complete!</div>
+    <div class="big-score" id="finalScore"></div>
+    <button onclick="restartQuiz()">Restart</button>
+  </div>
+
+<script>
+  const mnemonicaOrder = [
+    'C4','H2','D7','C3','H4','D6','SA','H5','S9','S2',
+    'HQ','D3','CQ','H8','S6','S5','H9','CK','D2','HJ',
+    'S3','S8','H6','CT','D5','DK','C2','H3','D8','C5',
+    'SK','DJ','C8','ST','HK','CJ','S7','HT','DA','S4',
+    'H7','D4','CA','C9','SJ','DQ','C7','SQ','DT','C6',
+    'HA','D9'
+  ];
+
+  // Build card -> position lookup (1-indexed)
+  const cardToIndex = {};
+  mnemonicaOrder.forEach((card, i) => { cardToIndex[card] = i + 1; });
+
+  const suitEmojis = { S: '♠', H: '♥', D: '♦', C: '♣' };
+  const redSuits = ['H', 'D'];
+
+  // Shuffle order of cards to quiz
+  let order = shuffleArray(mnemonicaOrder.slice());
+  let idx = 0;
+  let correct = 0;
+  let total = 0;
+  let answered = false;
+
+  const answerInput = document.getElementById('answerInput');
+
+  function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function cardLabel(code) {
+    return code.slice(1) + suitEmojis[code[0]];
+  }
+
+  function buildButtons() {
+    const digitRow = document.getElementById('digitRow');
+    for (let i = 0; i <= 9; i++) {
+      const btn = document.createElement('button');
+      btn.textContent = i;
+      btn.onclick = () => appendDigit(i);
+      digitRow.appendChild(btn);
+    }
+  }
+
+  function appendDigit(d) {
+    if (answered) return;
+    answerInput.value += d;
+    answerInput.focus();
+  }
+
+  answerInput.addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9]/g, '');
+  });
+
+  answerInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submitAnswer();
+    }
+  });
+
+  function submitAnswer() {
+    if (answered) return;
+    const val = answerInput.value.trim();
+    if (val === '') return;
+    const guess = parseInt(val, 10);
+    checkAnswer(guess);
+  }
+
+  function updateScore() {
+    document.getElementById('score').textContent = `Score: ${correct}/${total}`;
+  }
+
+  function loadRound() {
+    if (idx >= order.length) {
+      document.getElementById('quiz').style.display = 'none';
+      document.getElementById('finalScreen').style.display = 'block';
+      document.getElementById('finalScore').textContent = `${correct} / 52 correct`;
+      return;
+    }
+
+    const card = order[idx];
+    const suit = card[0];
+    document.getElementById('cardImg').src = `img/${card}.png`;
+    const label = document.getElementById('cardLabel');
+    label.textContent = cardLabel(card);
+    label.className = 'card-label ' + (redSuits.includes(suit) ? 'red' : 'black');
+
+    answerInput.value = '';
+    answerInput.placeholder = '?';
+    document.getElementById('feedback').textContent = '';
+    answered = false;
+    enableButtons(true);
+    answerInput.disabled = false;
+    answerInput.focus();
+  }
+
+  function enableButtons(on) {
+    document.querySelectorAll('#digitRow button').forEach(b => b.disabled = !on);
+    document.getElementById('goBtn').disabled = !on;
+  }
+
+  function checkAnswer(guess) {
+    answered = true;
+    total++;
+    enableButtons(false);
+    answerInput.disabled = true;
+
+    const card = order[idx];
+    const correctPos = cardToIndex[card];
+    answerInput.value = correctPos;
+
+    if (guess === correctPos) {
+      correct++;
+      document.getElementById('feedback').textContent = '✅';
+    } else {
+      document.getElementById('feedback').textContent = `❌ Position: ${correctPos}`;
+    }
+    updateScore();
+
+    idx++;
+    setTimeout(loadRound, 2000);
+  }
+
+  function restartQuiz() {
+    order = shuffleArray(mnemonicaOrder.slice());
+    idx = 0;
+    correct = 0;
+    total = 0;
+    updateScore();
+    document.getElementById('quiz').style.display = 'block';
+    document.getElementById('finalScreen').style.display = 'none';
+    loadRound();
+  }
+
+  buildButtons();
+  loadRound();
+</script>
+<script src="nav.js"></script>
+</body>
+</html>

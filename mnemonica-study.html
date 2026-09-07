@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Mnemonica Study</title>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #000000;
+      --accent: #f0f0f0;
+      --accent-hover: #e0e0e0;
+      --border: #dddddd;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1e1e1e;
+        --text-color: #ffffff;
+        --accent: #333333;
+        --accent-hover: #444444;
+        --border: #3a3a3a;
+      }
+    }
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      font-family: sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      display: flex; flex-direction: column; align-items: center;
+      overflow-x: hidden;
+    }
+    .progress {
+      margin-top: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .index-display {
+      font-size: 4rem;
+      font-weight: 700;
+      margin: 10px 0 4px;
+    }
+    .prev-card {
+      font-size: 0.95rem;
+      min-height: 24px;
+      margin-bottom: 8px;
+      opacity: 0.7;
+    }
+    .card-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 220px;
+    }
+    .card-area img {
+      width: 140px;
+      height: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .card-label {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 6px;
+      min-height: 36px;
+    }
+    .card-label.red { color: #DD0000; }
+    .card-label.black { color: var(--text-color); }
+    .hidden-placeholder {
+      width: 140px;
+      height: 200px;
+      border-radius: 12px;
+      border: 2px dashed var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      opacity: 0.4;
+    }
+    #flipBtn {
+      margin-top: 16px;
+      padding: 12px 40px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--accent);
+      color: var(--text-color);
+      cursor: pointer;
+    }
+    #flipBtn:hover { background: var(--accent-hover); }
+    .done-msg {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="progress" id="progress">1 / 52</div>
+  <div class="index-display" id="indexDisplay">1</div>
+  <img id="pegImg" src="" style="width:100px;height:100px;object-fit:contain;border-radius:8px;" />
+  <div class="prev-card" id="prevCard"></div>
+  <div class="card-area" id="cardArea">
+    <div class="hidden-placeholder" id="placeholder">?</div>
+  </div>
+  <div class="card-label" id="cardLabel"></div>
+  <button id="flipBtn" onclick="flipOrNext()">Flip</button>
+
+<script>
+  const mnemonicaOrder = [
+    'C4','H2','D7','C3','H4','D6','SA','H5','S9','S2',
+    'HQ','D3','CQ','H8','S6','S5','H9','CK','D2','HJ',
+    'S3','S8','H6','CT','D5','DK','C2','H3','D8','C5',
+    'SK','DJ','C8','ST','HK','CJ','S7','HT','DA','S4',
+    'H7','D4','CA','C9','SJ','DQ','C7','SQ','DT','C6',
+    'HA','D9'
+  ];
+
+  const suitEmojis = { S: '♠', H: '♥', D: '♦', C: '♣' };
+  const redSuits = ['H', 'D'];
+
+  let currentIndex = 0;
+  let revealed = false;
+
+  function cardLabel(code) {
+    return code.slice(1) + suitEmojis[code[0]];
+  }
+
+  function showPosition() {
+    const pos = currentIndex + 1;
+    document.getElementById('progress').textContent = `${pos} / 52`;
+    document.getElementById('indexDisplay').textContent = pos;
+    document.getElementById('pegImg').src = `img/numbers/${pos}.png`;
+
+    if (currentIndex > 0) {
+      const prev = mnemonicaOrder[currentIndex - 1];
+      const suit = prev[0];
+      const color = redSuits.includes(suit) ? 'color:#DD0000' : '';
+      document.getElementById('prevCard').innerHTML = `Previous: <span style="${color};font-weight:700">${cardLabel(prev)}</span>`;
+    } else {
+      document.getElementById('prevCard').textContent = '';
+    }
+
+    document.getElementById('cardArea').innerHTML = '<div class="hidden-placeholder" id="placeholder">?</div>';
+    document.getElementById('cardLabel').textContent = '';
+    document.getElementById('flipBtn').textContent = 'Flip';
+    revealed = false;
+  }
+
+  function revealCard() {
+    const code = mnemonicaOrder[currentIndex];
+    const suit = code[0];
+    document.getElementById('cardArea').innerHTML = `<img src="img/${code}.png" alt="${cardLabel(code)}" />`;
+    const label = document.getElementById('cardLabel');
+    label.textContent = cardLabel(code);
+    label.className = 'card-label ' + (redSuits.includes(suit) ? 'red' : 'black');
+    document.getElementById('flipBtn').textContent = 'Next';
+    revealed = true;
+  }
+
+  function flipOrNext() {
+    if (!revealed) {
+      revealCard();
+    } else {
+      currentIndex++;
+      if (currentIndex >= mnemonicaOrder.length) {
+        document.getElementById('cardArea').innerHTML = '';
+        document.getElementById('cardLabel').textContent = '';
+        document.getElementById('indexDisplay').textContent = '';
+        document.getElementById('prevCard').textContent = '';
+        document.getElementById('progress').textContent = 'Complete!';
+        document.getElementById('flipBtn').textContent = 'Restart';
+        document.getElementById('flipBtn').onclick = () => {
+          currentIndex = 0;
+          revealed = false;
+          document.getElementById('flipBtn').onclick = flipOrNext;
+          showPosition();
+        };
+        return;
+      }
+      showPosition();
+    }
+  }
+
+  showPosition();
+</script>
+<script src="nav.js"></script>
+</body>
+</html>

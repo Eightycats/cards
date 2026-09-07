@@ -1,4 +1,4 @@
-const cacheName = "card-trainer-v4";
+const cacheName = "card-trainer-v5";
 const assetsToCache = [
   "./",
   "./index.html",
@@ -16,6 +16,13 @@ const assetsToCache = [
   "./numbers-study.html",
   "./numbers-quiz.html",
   "./numbers-reverse.html",
+  "./stacks-index.html",
+  "./stebbins-quiz.html",
+  "./mnemonica-index.html",
+  "./mnemonica-quiz.html",
+  "./mnemonica-study.html",
+  "./mnemonica-index-to-card.html",
+  "./mnemonica-card-to-index.html",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",

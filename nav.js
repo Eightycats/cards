@@ -5,6 +5,7 @@
     { href: 'index.html', label: 'Home' },
     { href: 'cards-index.html', label: 'Cards' },
     { href: 'numbers-index.html', label: 'Numbers' },
+    { href: 'stacks-index.html', label: 'Stacks' },
   ];
 
   // Inject CSS

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Mnemonica Quiz (In Order)</title>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #000000;
+      --accent: #f0f0f0;
+      --accent-hover: #e0e0e0;
+      --border: #dddddd;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1e1e1e;
+        --text-color: #ffffff;
+        --accent: #333333;
+        --accent-hover: #444444;
+        --border: #3a3a3a;
+      }
+    }
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      font-family: sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      display: flex; flex-direction: column; align-items: center;
+      overflow-x: hidden;
+    }
+    .top-info {
+      margin-top: 50px;
+      text-align: center;
+    }
+    .index-display {
+      font-size: 3rem;
+      font-weight: 700;
+      margin: 4px 0;
+    }
+    .peg-img {
+      width: 100px; height: 100px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    .prev-card {
+      font-size: 0.95rem;
+      min-height: 24px;
+      margin: 4px 0;
+      opacity: 0.7;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      margin: 6px 0;
+      padding: 0 10px;
+    }
+    .buttons button {
+      padding: 10px 12px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--accent);
+      color: var(--text-color);
+      min-width: 44px;
+      cursor: pointer;
+    }
+    .buttons button:hover { background: var(--accent-hover); }
+    #result {
+      font-size: 20px;
+      min-height: 30px;
+      line-height: 30px;
+      margin: 4px 0;
+      text-align: center;
+    }
+    .reveal-card {
+      display: flex; flex-direction: column; align-items: center;
+      min-height: 60px;
+    }
+    .reveal-card img {
+      width: 80px; border-radius: 8px;
+    }
+    .reveal-label {
+      font-size: 1.2rem; font-weight: 700; margin-top: 2px;
+    }
+    .reveal-label.red { color: #DD0000; }
+    .reveal-label.black { color: var(--text-color); }
+    .final-screen {
+      display: none;
+      text-align: center;
+      margin-top: 60px;
+    }
+    .final-screen .big-score {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 20px 0;
+    }
+    .final-screen button {
+      padding: 12px 30px;
+      font-size: 1.1rem;
+      border-radius: 10px;
+      border: 1px solid var(--text-color);
+      background: var(--accent);
+      color: var(--text-color);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="scoreDisplay" style="position:fixed;top:10px;right:10px;font-size:14px;font-weight:600;z-index:999;">Score: 0/0</div>
+
+  <div id="quiz">
+    <div class="top-info">
+      <div class="index-display" id="indexDisplay"></div>
+      <img class="peg-img" id="pegImg" src="" />
+      <div class="prev-card" id="prevCard"></div>
+    </div>
+
+    <div class="buttons" id="rankButtons">
+      <button onclick="selectRank('A')">A</button>
+      <button onclick="selectRank('2')">2</button>
+      <button onclick="selectRank('3')">3</button>
+      <button onclick="selectRank('4')">4</button>
+      <button onclick="selectRank('5')">5</button>
+      <button onclick="selectRank('6')">6</button>
+      <button onclick="selectRank('7')">7</button>
+    </div>
+    <div class="buttons" id="rankButtons2">
+      <button onclick="selectRank('8')">8</button>
+      <button onclick="selectRank('9')">9</button>
+      <button onclick="selectRank('T')">10</button>
+      <button onclick="selectRank('J')">J</button>
+      <button onclick="selectRank('Q')">Q</button>
+      <button onclick="selectRank('K')">K</button>
+    </div>
+    <div class="buttons" id="suitButtons">
+      <button onclick="selectSuit('H')">♥️</button>
+      <button onclick="selectSuit('S')">♠️</button>
+      <button onclick="selectSuit('D')">♦️</button>
+      <button onclick="selectSuit('C')">♣️</button>
+    </div>
+
+    <div id="result"></div>
+    <div class="reveal-card" id="revealArea"></div>
+  </div>
+
+  <div class="final-screen" id="finalScreen">
+    <div>Complete!</div>
+    <div class="big-score" id="finalScore"></div>
+    <button onclick="restartQuiz()">Restart</button>
+  </div>
+
+<script>
+  const mnemonicaOrder = [
+    'C4','H2','D7','C3','H4','D6','SA','H5','S9','S2',
+    'HQ','D3','CQ','H8','S6','S5','H9','CK','D2','HJ',
+    'S3','S8','H6','CT','D5','DK','C2','H3','D8','C5',
+    'SK','DJ','C8','ST','HK','CJ','S7','HT','DA','S4',
+    'H7','D4','CA','C9','SJ','DQ','C7','SQ','DT','C6',
+    'HA','D9'
+  ];
+
+  const suitEmojis = { S: '♠', H: '♥', D: '♦', C: '♣' };
+  const redSuits = ['H', 'D'];
+
+  let currentIndex = 0;
+  let selectedSuit = '';
+  let selectedRank = '';
+  let scoreCorrect = 0;
+  let scoreTotal = 0;
+  let answered = false;
+
+  function updateScore() {
+    document.getElementById('scoreDisplay').textContent = `Score: ${scoreCorrect}/${scoreTotal}`;
+  }
+
+  function cardLabel(code) {
+    return code.slice(1) + suitEmojis[code[0]];
+  }
+
+  function loadRound() {
+    if (currentIndex >= mnemonicaOrder.length) {
+      document.getElementById('quiz').style.display = 'none';
+      document.getElementById('finalScreen').style.display = 'block';
+      document.getElementById('finalScore').textContent = `${scoreCorrect} / ${mnemonicaOrder.length} correct`;
+      return;
+    }
+
+    const pos = currentIndex + 1;
+    document.getElementById('indexDisplay').textContent = pos;
+    document.getElementById('pegImg').src = `img/numbers/${pos}.png`;
+
+    if (currentIndex > 0) {
+      const prev = mnemonicaOrder[currentIndex - 1];
+      const color = redSuits.includes(prev[0]) ? 'color:#DD0000' : '';
+      document.getElementById('prevCard').innerHTML = `Previous: <span style="${color};font-weight:700">${cardLabel(prev)}</span>`;
+    } else {
+      document.getElementById('prevCard').textContent = '';
+    }
+
+    selectedSuit = '';
+    selectedRank = '';
+    answered = false;
+    document.getElementById('result').textContent = '';
+    document.getElementById('revealArea').innerHTML = '';
+    enableButtons(true);
+  }
+
+  function enableButtons(on) {
+    document.querySelectorAll('.buttons button').forEach(b => b.disabled = !on);
+  }
+
+  function selectSuit(suit) {
+    if (answered) return;
+    selectedSuit = suit;
+    checkGuess();
+  }
+
+  function selectRank(rank) {
+    if (answered) return;
+    selectedRank = rank;
+    checkGuess();
+  }
+
+  function checkGuess() {
+    if (!selectedSuit || !selectedRank) return;
+    answered = true;
+    enableButtons(false);
+
+    const guess = selectedSuit + selectedRank;
+    const correct = mnemonicaOrder[currentIndex];
+    const isCorrect = guess === correct;
+
+    scoreTotal++;
+    if (isCorrect) scoreCorrect++;
+    updateScore();
+
+    document.getElementById('result').textContent = isCorrect ? '✅' : '❌';
+
+    const suit = correct[0];
+    const colorClass = redSuits.includes(suit) ? 'red' : 'black';
+    document.getElementById('revealArea').innerHTML =
+      `<img src="img/${correct}.png" /><div class="reveal-label ${colorClass}">${cardLabel(correct)}</div>`;
+
+    currentIndex++;
+    setTimeout(loadRound, 2000);
+  }
+
+  function restartQuiz() {
+    currentIndex = 0;
+    scoreCorrect = 0;
+    scoreTotal = 0;
+    updateScore();
+    document.getElementById('quiz').style.display = 'block';
+    document.getElementById('finalScreen').style.display = 'none';
+    loadRound();
+  }
+
+  loadRound();
+</script>
+<script src="nav.js"></script>
+</body>
+</html>

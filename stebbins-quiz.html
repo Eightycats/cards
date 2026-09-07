@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Si Stebbins Quiz</title>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #000000;
+      --accent: #f0f0f0;
+      --accent-hover: #e0e0e0;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1e1e1e;
+        --text-color: #ffffff;
+        --accent: #333333;
+        --accent-hover: #444444;
+      }
+    }
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      font-family: sans-serif;
+      box-sizing: border-box;
+      display: flex; flex-direction: column; align-items: center;
+      overflow: hidden;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+    }
+    .current-card {
+      position: relative;
+      height: 180px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .current-card img {
+      width: 110px; height: 160px;
+      border: 1px solid var(--text-color);
+      border-radius: 12px;
+      object-fit: contain;
+    }
+    .current-label {
+      font-size: 28px; font-weight: 700; margin-top: 4px;
+    }
+    .current-label.red { color: #DD0000; }
+    .current-label.black { color: var(--text-color); }
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px; padding: 10px;
+      max-width: 100%; max-height: 40vh;
+      overflow: hidden; justify-items: center;
+    }
+    .card-option {
+      width: 70px; border-radius: 6px;
+      border: 2px solid transparent;
+      cursor: pointer;
+    }
+    .card-option.correct { border-color: green; }
+    .card-option.incorrect { border-color: red; }
+    #result {
+      height: 50px; font-size: 24px; text-align: center;
+      margin-top: 5px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; min-height: 50px;
+    }
+  </style>
+</head>
+<body>
+  <div id="scoreDisplay" style="position:fixed;top:10px;right:10px;font-size:14px;font-weight:600;z-index:999;">Score: 0/0</div>
+
+  <div style="height: 50px;"></div>
+  <div class="current-card">
+    <img id="currentImg" src="" />
+  </div>
+  <div id="currentLabel" class="current-label"></div>
+
+  <div id="result"><div id="feedbackText"></div></div>
+  <div class="image-grid" id="imageOptions"></div>
+
+<script>
+  const suitOrder = ['C', 'H', 'S', 'D'];
+  const suits = ['S', 'H', 'D', 'C'];
+  const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'];
+  const suitEmojis = { S: '♠', H: '♥', D: '♦', C: '♣' };
+  const redSuits = ['H', 'D'];
+  const rankToVal = { A:1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9, T:10, J:11, Q:12, K:13 };
+  const valToRank = { 1:'A', 2:'2', 3:'3', 4:'4', 5:'5', 6:'6', 7:'7', 8:'8', 9:'9', 10:'T', 11:'J', 12:'Q', 13:'K' };
+
+  let currentCard = '';
+  let scoreCorrect = 0;
+  let scoreTotal = 0;
+  let cardsCompleted = 0;
+
+  function updateScore() {
+    document.getElementById('scoreDisplay').textContent = `Score: ${scoreCorrect}/${scoreTotal}`;
+  }
+
+  function getNextStebbins(code) {
+    const suit = code[0];
+    const rank = code.slice(1);
+    const nextSuitIdx = (suitOrder.indexOf(suit) + 1) % 4;
+    const nextSuit = suitOrder[nextSuitIdx];
+    let nextVal = (rankToVal[rank] + 3) % 13;
+    if (nextVal === 0) nextVal = 13;
+    return nextSuit + valToRank[nextVal];
+  }
+
+  function getRandomCard(excludeList = []) {
+    let card;
+    do {
+      const suit = suits[Math.floor(Math.random() * suits.length)];
+      const rank = ranks[Math.floor(Math.random() * ranks.length)];
+      card = suit + rank;
+    } while (excludeList.includes(card));
+    return card;
+  }
+
+  function cardLabel(code) {
+    const suit = code[0];
+    const rank = code.slice(1);
+    return rank + suitEmojis[suit];
+  }
+
+  function showCurrentCard(code) {
+    document.getElementById('currentImg').src = `img/${code}.png`;
+    const label = document.getElementById('currentLabel');
+    label.textContent = cardLabel(code);
+    label.className = 'current-label ' + (redSuits.includes(code[0]) ? 'red' : 'black');
+  }
+
+  function loadNextRound() {
+    if (cardsCompleted >= 52) {
+      document.getElementById('feedbackText').textContent = `Done! Final: ${scoreCorrect}/${scoreTotal}`;
+      document.getElementById('imageOptions').innerHTML = '';
+      return;
+    }
+
+    if (!currentCard) {
+      currentCard = getRandomCard();
+    }
+
+    showCurrentCard(currentCard);
+    document.getElementById('feedbackText').textContent = '';
+
+    const correctNext = getNextStebbins(currentCard);
+    const options = new Set();
+    options.add(correctNext);
+    while (options.size < 8) {
+      options.add(getRandomCard([...options, currentCard]));
+    }
+
+    const shuffled = Array.from(options).sort(() => Math.random() - 0.5);
+    const container = document.getElementById('imageOptions');
+    container.innerHTML = '';
+
+    for (const card of shuffled) {
+      const img = document.createElement('img');
+      img.src = `img/${card}.png`;
+      img.classList.add('card-option');
+      img.onclick = () => handleSelection(img, card, correctNext);
+      container.appendChild(img);
+    }
+  }
+
+  function handleSelection(img, selected, correctNext) {
+    const feedbackText = document.getElementById('feedbackText');
+    const isCorrect = selected === correctNext;
+
+    scoreTotal++;
+    cardsCompleted++;
+
+    if (isCorrect) {
+      scoreCorrect++;
+      img.classList.add('correct');
+      feedbackText.textContent = '✅';
+    } else {
+      img.classList.add('incorrect');
+      feedbackText.textContent = '❌';
+      // Highlight the correct option
+      document.querySelectorAll('.card-option').forEach(opt => {
+        if (opt.src.includes(`img/${correctNext}_hidden.png`)) {
+          opt.classList.add('correct');
+        }
+      });
+    }
+    updateScore();
+
+    document.querySelectorAll('.card-option').forEach(opt => opt.onclick = null);
+
+    currentCard = correctNext;
+    setTimeout(loadNextRound, 2000);
+  }
+
+  loadNextRound();
+</script>
+<script src="nav.js"></script>
+</body>
+</html>
