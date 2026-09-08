@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Preflop Grid</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #000000;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1e1e1e;
+        --text-color: #ffffff;
+      }
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+    }
+    .grid-wrapper {
+      overflow: auto;
+      padding: 10px 10px 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(14, auto);
+      gap: 3px;
+    }
+    .header-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      padding: 6px;
+      position: sticky;
+    }
+    .cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      border-radius: 4px;
+    }
+    .cell img {
+      width: 52px;
+      height: auto;
+      border-radius: 3px;
+    }
+    .cell .card-imgs {
+      display: flex;
+      gap: 2px;
+    }
+    .cell .num-img {
+      margin-top: 3px;
+    }
+    .cell .num-img img {
+      width: 44px;
+    }
+    .corner { }
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 50px 10px 8px;
+      justify-content: center;
+    }
+    .filter-btn {
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #fff;
+      opacity: 0.7;
+      transition: opacity 0.15s;
+    }
+    .filter-btn:hover { opacity: 0.9; }
+    .filter-btn.active { opacity: 1; outline: 2px solid var(--text-color); outline-offset: 1px; }
+    .cell.dimmed { opacity: 0.08; }
+  </style>
+</head>
+<body>
+
+<div class="filter-bar" id="filterBar"></div>
+<div class="grid-wrapper">
+  <div class="grid" id="grid"></div>
+</div>
+
+<script>
+  const ranks = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
+
+  const scores = [
+    [10,10,9,9,8,8,7,7,7,7,7,7,7],
+    [9,10,9,8,8,7,5,4,4,4,4,4,1],
+    [8,8,10,8,8,7,5,4,4,4,1,0,0],
+    [8,6,6,9,8,7,5,4,4,0,0,0,0],
+    [6,5,5,5,9,7,7,4,4,0,0,0,0],
+    [4,4,4,4,4,9,7,6,3,1,0,0,0],
+    [4,1,1,1,1,1,8,7,5,3,1,0,0],
+    [4,0,0,0,0,0,0,8,7,3,1,0,0],
+    [4,0,0,0,0,0,0,0,7,6,3,1,0],
+    [4,0,0,0,0,0,0,0,0,7,5,1,0],
+    [4,0,0,0,0,0,0,0,0,0,6,3,0],
+    [4,0,0,0,0,0,0,0,0,0,0,5,1],
+    [4,0,0,0,0,0,0,0,0,0,0,0,5]
+  ];
+
+  function scoreToColor(score) {
+    const hue = 240 - (score / 10) * 240;
+    return `hsl(${hue}, 80%, 45%)`;
+  }
+
+  const grid = document.getElementById('grid');
+  const allCells = [];
+
+  // Build filter bar
+  const filterBar = document.getElementById('filterBar');
+  const allBtn = document.createElement('button');
+  allBtn.className = 'filter-btn active';
+  allBtn.textContent = 'All';
+  allBtn.style.backgroundColor = '#666';
+  allBtn.addEventListener('click', () => applyFilter(null));
+  filterBar.appendChild(allBtn);
+
+  for (let s = 10; s >= 0; s--) {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn';
+    btn.textContent = s * 10;
+    btn.style.backgroundColor = scoreToColor(s);
+    btn.addEventListener('click', () => applyFilter(s));
+    filterBar.appendChild(btn);
+  }
+
+  let activeFilter = null;
+
+  function applyFilter(score) {
+    activeFilter = score;
+    // Update button active states
+    const btns = filterBar.querySelectorAll('.filter-btn');
+    btns.forEach(b => b.classList.remove('active'));
+    if (score === null) {
+      btns[0].classList.add('active');
+    } else {
+      btns[11 - score].classList.add('active');
+    }
+    // Dim/show cells
+    for (const { el, score: cellScore } of allCells) {
+      if (score === null || cellScore === score) {
+        el.classList.remove('dimmed');
+      } else {
+        el.classList.add('dimmed');
+      }
+    }
+  }
+
+  // Top-left corner
+  const corner = document.createElement('div');
+  corner.className = 'header-cell corner';
+  grid.appendChild(corner);
+
+  // Column headers
+  for (const r of ranks) {
+    const h = document.createElement('div');
+    h.className = 'header-cell';
+    h.textContent = r;
+    grid.appendChild(h);
+  }
+
+  // Rows
+  for (let row = 0; row < 13; row++) {
+    // Row header
+    const rh = document.createElement('div');
+    rh.className = 'header-cell';
+    rh.textContent = ranks[row];
+    grid.appendChild(rh);
+
+    for (let col = 0; col < 13; col++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      const score = scores[row][col];
+      cell.style.backgroundColor = scoreToColor(score);
+
+      // Card images
+      const cardImgs = document.createElement('div');
+      cardImgs.className = 'card-imgs';
+
+      const img1 = document.createElement('img');
+      const img2 = document.createElement('img');
+
+      if (row < col) {
+        // Suited: both spades
+        img1.src = `img/cards/S${ranks[row]}.png`;
+        img2.src = `img/cards/S${ranks[col]}.png`;
+      } else {
+        // Offsuit or pair: spade + heart
+        img1.src = `img/cards/S${ranks[row]}.png`;
+        img2.src = `img/cards/H${ranks[col]}.png`;
+      }
+
+      cardImgs.appendChild(img1);
+      cardImgs.appendChild(img2);
+      cell.appendChild(cardImgs);
+
+      // Number peg image
+      const numDiv = document.createElement('div');
+      numDiv.className = 'num-img';
+      const numImg = document.createElement('img');
+      numImg.src = `img/numbers/${score * 10}.png`;
+      numDiv.appendChild(numImg);
+      cell.appendChild(numDiv);
+
+      allCells.push({ el: cell, score });
+      grid.appendChild(cell);
+    }
+  }
+</script>
+
+<script src="nav.js"></script>
+</body>
+</html>

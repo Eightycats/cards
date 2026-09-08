@@ -6,6 +6,7 @@
     { href: 'cards-index.html', label: 'Cards' },
     { href: 'numbers-index.html', label: 'Numbers' },
     { href: 'stacks-index.html', label: 'Stacks' },
+    { href: 'preflop-index.html', label: 'Preflop' },
   ];
 
   // Inject CSS

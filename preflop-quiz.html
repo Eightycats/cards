@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Preflop Quiz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #000000;
+      --accent: #f0f0f0;
+      --accent-hover: #e0e0e0;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1e1e1e;
+        --text-color: #ffffff;
+        --accent: #333333;
+        --accent-hover: #444444;
+      }
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #scoreDisplay {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 999;
+    }
+    .quiz-area {
+      margin-top: 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+      max-width: 400px;
+      padding: 0 20px;
+    }
+    .hand-display {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .hand-display img {
+      width: 80px;
+      height: auto;
+      border-radius: 6px;
+    }
+    .hand-label {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    .slider-area {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+    }
+    .slider-row input[type="range"] {
+      flex: 1;
+    }
+    .step-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background-color: var(--accent);
+      color: var(--text-color);
+      font-size: 1.4rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-btn:hover { background-color: var(--accent-hover); }
+    .step-btn:disabled { opacity: 0.3; cursor: default; }
+    .slider-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    #submitBtn {
+      font-size: 1.1rem;
+      font-weight: 500;
+      padding: 12px 40px;
+      border-radius: 10px;
+      border: none;
+      background-color: var(--accent);
+      color: var(--text-color);
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    #submitBtn:hover { background-color: var(--accent-hover); }
+    #submitBtn:disabled { opacity: 0.5; cursor: default; }
+    .feedback {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      min-height: 100px;
+    }
+    .feedback-text {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    .feedback img {
+      width: 60px;
+      height: auto;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="scoreDisplay">Avg Error: — | 0 attempts</div>
+
+<div class="quiz-area">
+  <div class="hand-display" id="handDisplay"></div>
+  <div class="hand-label" id="handLabel"></div>
+
+  <div class="slider-area">
+    <div class="slider-row">
+      <button class="step-btn" id="minusBtn">&minus;</button>
+      <input type="range" id="slider" min="0" max="10" step="1" value="5" />
+      <button class="step-btn" id="plusBtn">+</button>
+    </div>
+    <div class="slider-value" id="sliderValue">5</div>
+  </div>
+
+  <button id="submitBtn">Submit</button>
+
+  <div class="feedback" id="feedback"></div>
+</div>
+
+<script>
+  const ranks = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
+
+  const scores = [
+    [10,10,9,9,8,8,7,7,7,7,7,7,7],
+    [9,10,9,8,8,7,5,4,4,4,4,4,1],
+    [8,8,10,8,8,7,5,4,4,4,1,0,0],
+    [8,6,6,9,8,7,5,4,4,0,0,0,0],
+    [6,5,5,5,9,7,7,4,4,0,0,0,0],
+    [4,4,4,4,4,9,7,6,3,1,0,0,0],
+    [4,1,1,1,1,1,8,7,5,3,1,0,0],
+    [4,0,0,0,0,0,0,8,7,3,1,0,0],
+    [4,0,0,0,0,0,0,0,7,6,3,1,0],
+    [4,0,0,0,0,0,0,0,0,7,5,1,0],
+    [4,0,0,0,0,0,0,0,0,0,6,3,0],
+    [4,0,0,0,0,0,0,0,0,0,0,5,1],
+    [4,0,0,0,0,0,0,0,0,0,0,0,5]
+  ];
+
+  let totalError = 0;
+  let attempts = 0;
+  let currentRow = 0;
+  let currentCol = 0;
+
+  const slider = document.getElementById('slider');
+  const sliderValue = document.getElementById('sliderValue');
+  const submitBtn = document.getElementById('submitBtn');
+  const feedbackDiv = document.getElementById('feedback');
+  const scoreDisplay = document.getElementById('scoreDisplay');
+  const minusBtn = document.getElementById('minusBtn');
+  const plusBtn = document.getElementById('plusBtn');
+
+  function syncSlider() {
+    sliderValue.textContent = slider.value;
+  }
+
+  slider.addEventListener('input', syncSlider);
+
+  minusBtn.addEventListener('click', () => {
+    slider.value = Math.max(0, parseInt(slider.value) - 1);
+    syncSlider();
+  });
+
+  plusBtn.addEventListener('click', () => {
+    slider.value = Math.min(10, parseInt(slider.value) + 1);
+    syncSlider();
+  });
+
+  submitBtn.addEventListener('click', handleSubmit);
+
+  function updateScore() {
+    if (attempts === 0) {
+      scoreDisplay.textContent = 'Avg Error: — | 0 attempts';
+    } else {
+      const avg = (totalError / attempts).toFixed(1);
+      scoreDisplay.textContent = `Avg Error: ${avg} | ${attempts} attempts`;
+    }
+  }
+
+  function getHandLabel(row, col) {
+    const r1 = ranks[row];
+    const r2 = ranks[col];
+    if (row === col) return r1 + r2;
+    if (row < col) return r1 + r2 + 's';
+    return r1 + r2 + 'o';
+  }
+
+  function loadRound() {
+    currentRow = Math.floor(Math.random() * 13);
+    currentCol = Math.floor(Math.random() * 13);
+
+    const handDisplay = document.getElementById('handDisplay');
+    handDisplay.innerHTML = '';
+
+    const img1 = document.createElement('img');
+    const img2 = document.createElement('img');
+
+    if (currentRow < currentCol) {
+      img1.src = `img/cards/S${ranks[currentRow]}.png`;
+      img2.src = `img/cards/S${ranks[currentCol]}.png`;
+    } else {
+      img1.src = `img/cards/S${ranks[currentRow]}.png`;
+      img2.src = `img/cards/H${ranks[currentCol]}.png`;
+    }
+
+    handDisplay.appendChild(img1);
+    handDisplay.appendChild(img2);
+
+    document.getElementById('handLabel').textContent = getHandLabel(currentRow, currentCol);
+
+    slider.value = 5;
+    slider.disabled = false;
+    sliderValue.textContent = '5';
+    submitBtn.disabled = false;
+    minusBtn.disabled = false;
+    plusBtn.disabled = false;
+    feedbackDiv.innerHTML = '';
+  }
+
+  function handleSubmit() {
+    const guess = parseInt(slider.value);
+    const actual = scores[currentRow][currentCol];
+    const diff = Math.abs(guess - actual);
+
+    attempts++;
+    totalError += diff;
+    updateScore();
+
+    submitBtn.disabled = true;
+    minusBtn.disabled = true;
+    plusBtn.disabled = true;
+    slider.disabled = true;
+
+    let color, label;
+    if (diff === 0) {
+      color = '#28a745';
+      label = 'Exact!';
+    } else if (diff <= 1) {
+      color = '#28a745';
+      label = `Off by ${diff}`;
+    } else if (diff <= 2) {
+      color = '#ffc107';
+      label = `Off by ${diff}`;
+    } else {
+      color = '#dc3545';
+      label = `Off by ${diff}`;
+    }
+
+    const text = document.createElement('div');
+    text.className = 'feedback-text';
+    text.style.color = color;
+    text.textContent = `${label} — Correct: ${actual}`;
+
+    const numImg = document.createElement('img');
+    numImg.src = `img/numbers/${actual * 10}.png`;
+
+    feedbackDiv.innerHTML = '';
+    feedbackDiv.appendChild(text);
+    feedbackDiv.appendChild(numImg);
+
+    setTimeout(loadRound, 2500);
+  }
+
+  loadRound();
+</script>
+
+<script src="nav.js"></script>
+</body>
+</html>
