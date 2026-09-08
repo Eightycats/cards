@@ -20,10 +20,22 @@
   const style = document.createElement('style');
   style.textContent = `
     :root {
+      color-scheme: light;
       --bg-color: #caa66a !important;
       --text-color: #2a160d !important;
       --accent: #d9b97e !important;
       --accent-hover: #e8cd96 !important;
+      --bg: #ffffff !important;
+      --bg2: #f3dfb2 !important;
+      --text: #2a160d !important;
+      --muted: #513c2a !important;
+      --border: #8f7048 !important;
+      --highlight: #f7e8bf !important;
+      --highlight-border: #a86a24 !important;
+      --suit-h: #a51f18 !important;
+      --suit-d: #a51f18 !important;
+      --suit-c: #2a160d !important;
+      --suit-s: #2a160d !important;
       --western-paper: #e2c58c;
       --western-paper-light: #efd7a4;
       --western-ink: #2a160d;
@@ -36,7 +48,7 @@
       padding: 0 !important;
       min-height: 100%;
       display: block !important;
-      background-color: #e8e0d0 !important;
+      background-color: var(--bg2) !important;
       background-image: radial-gradient(circle at 20% 30%, rgba(72,55,34,.05) 0 1px, transparent 1.5px);
     }
     body {
@@ -145,6 +157,10 @@
     th, .header-cell { background: rgba(122, 36, 27, .16) !important; }
     .correct { color: #28552d !important; }
     .incorrect, .red, .hearts, .diamonds { color: var(--western-red) !important; }
+    thead th, .suit-label, .royal-rank, .examples, .memory-aid,
+    .example-box .breakdown {
+      color: var(--muted) !important;
+    }
     .menu, .suit-buttons, .card-grid, .image-grid, .buttons, #quiz,
     .card-container, #result, #pegWord, #cardImage {
       margin-left: auto !important;
@@ -161,8 +177,9 @@
       z-index: 1000;
       background: var(--accent, #f0f0f0);
       border: 1px solid var(--text-color, var(--text, #000));
-      border-radius: 50% !important;
-      padding: 8px 11px;
+      min-width: 46px;
+      border-radius: 9px !important;
+      padding: 8px 12px;
       font-size: 19px;
       cursor: pointer;
       color: var(--text-color, var(--text, #000));
