@@ -129,7 +129,7 @@
   const allBtn = document.createElement('button');
   allBtn.className = 'filter-btn active';
   allBtn.textContent = 'All';
-  allBtn.style.backgroundColor = '#666';
+  allBtn.style.setProperty('--filter-color', '#666');
   allBtn.addEventListener('click', () => applyFilter(null));
   filterBar.appendChild(allBtn);
 
@@ -137,7 +137,7 @@
     const btn = document.createElement('button');
     btn.className = 'filter-btn';
     btn.textContent = s * 10;
-    btn.style.backgroundColor = scoreToColor(s);
+    btn.style.setProperty('--filter-color', scoreToColor(s));
     btn.addEventListener('click', () => applyFilter(s));
     filterBar.appendChild(btn);
   }
