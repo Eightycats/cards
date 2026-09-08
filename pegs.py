@@ -1,5 +1,5 @@
 def print_card(suit, rank):
-    print(f"<img src=\"img/{suit}{rank}.png\">\n")
+    print(f"<img src=\"img/cards/{suit}{rank}.png\">\n")
 
 def print_suit(suit):
     for i in range(1, 10):

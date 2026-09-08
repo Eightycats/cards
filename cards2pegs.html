@@ -192,7 +192,7 @@ function loadNextRound() {
 
   for (let card of shuffled) {
     const img = document.createElement('img');
-    img.src = `img/${card}_hidden.png`;
+    img.src = `img/cards/${card}_hidden.png`;
     img.classList.add('card-option');
     img.onclick = () => handleSelection(img, card === currentCard);
     imageContainer.appendChild(img);
@@ -215,7 +215,7 @@ function handleSelection(img, isCorrect) {
     img.classList.add('incorrect');
     resultText.textContent = '❌';
     cardDisplay.style.display = 'none';
-    correctImage.src = `img/${currentCard}_hidden.png`;
+    correctImage.src = `img/cards/${currentCard}_hidden.png`;
     correctImage.style.display = 'block';
   }
   updateScore();

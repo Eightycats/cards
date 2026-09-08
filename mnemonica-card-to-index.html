@@ -233,7 +233,7 @@
 
     const card = order[idx];
     const suit = card[0];
-    document.getElementById('cardImg').src = `img/${card}.png`;
+    document.getElementById('cardImg').src = `img/cards/${card}.png`;
     const label = document.getElementById('cardLabel');
     label.textContent = cardLabel(card);
     label.className = 'card-label ' + (redSuits.includes(suit) ? 'red' : 'black');

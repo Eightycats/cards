@@ -74,14 +74,14 @@
     }
 
     function showHiddenCard(cardCode) {
-      document.getElementById("cardImage").src = `img/${cardCode}_hidden.png`;
+      document.getElementById("cardImage").src = `img/cards/${cardCode}_hidden.png`;
       document.getElementById("pegWord").textContent = "-----";
       document.getElementById("toggleButton").textContent = "Flip";
       showingBack = false;
     }
 
     function flipCard(cardCode) {
-      document.getElementById("cardImage").src = `img/${cardCode}.png`;
+      document.getElementById("cardImage").src = `img/cards/${cardCode}.png`;
       document.getElementById("pegWord").textContent = cards[cardCode];
       document.getElementById("toggleButton").textContent = "Next";
       showingBack = true;

@@ -6,7 +6,7 @@ def generate_suit_section(suit_code, suit_name):
     section.append(f'    <div class="card-grid">')
     for rank in ranks:
         filename = f"{suit_code}{rank}.webp"
-        section.append(f'      <img src="img/{filename}" alt="{suit_code}{rank}">')
+        section.append(f'      <img src="img/cards/{filename}" alt="{suit_code}{rank}">')
     section.append(f'    </div>')
     section.append(f'  </div>\n')
     return '\n'.join(section)

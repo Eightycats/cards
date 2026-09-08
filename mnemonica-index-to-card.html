@@ -239,7 +239,7 @@
     const suit = correct[0];
     const colorClass = redSuits.includes(suit) ? 'red' : 'black';
     document.getElementById('revealArea').innerHTML =
-      `<img src="img/${correct}.png" /><div class="reveal-label ${colorClass}">${cardLabel(correct)}</div>`;
+      `<img src="img/cards/${correct}.png" /><div class="reveal-label ${colorClass}">${cardLabel(correct)}</div>`;
 
     idx++;
     setTimeout(loadRound, 2000);

@@ -150,7 +150,7 @@
   function revealCard() {
     const code = mnemonicaOrder[currentIndex];
     const suit = code[0];
-    document.getElementById('cardArea').innerHTML = `<img src="img/${code}.png" alt="${cardLabel(code)}" />`;
+    document.getElementById('cardArea').innerHTML = `<img src="img/cards/${code}.png" alt="${cardLabel(code)}" />`;
     const label = document.getElementById('cardLabel');
     label.textContent = cardLabel(code);
     label.className = 'card-label ' + (redSuits.includes(suit) ? 'red' : 'black');

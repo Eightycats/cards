@@ -122,7 +122,7 @@
   }
 
   function showCurrentCard(code) {
-    document.getElementById('currentImg').src = `img/${code}.png`;
+    document.getElementById('currentImg').src = `img/cards/${code}.png`;
     const label = document.getElementById('currentLabel');
     label.textContent = cardLabel(code);
     label.className = 'current-label ' + (redSuits.includes(code[0]) ? 'red' : 'black');
@@ -155,7 +155,7 @@
 
     for (const card of shuffled) {
       const img = document.createElement('img');
-      img.src = `img/${card}.png`;
+      img.src = `img/cards/${card}.png`;
       img.classList.add('card-option');
       img.onclick = () => handleSelection(img, card, correctNext);
       container.appendChild(img);
@@ -178,7 +178,7 @@
       feedbackText.textContent = '❌';
       // Highlight the correct option
       document.querySelectorAll('.card-option').forEach(opt => {
-        if (opt.src.includes(`img/${correctNext}_hidden.png`)) {
+        if (opt.src.includes(`img/cards/${correctNext}_hidden.png`)) {
           opt.classList.add('correct');
         }
       });
