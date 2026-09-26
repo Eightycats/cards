@@ -1,4 +1,4 @@
-const cacheName = "card-trainer-v10";
+const cacheName = "card-trainer-v11";
 const assetsToCache = [
   "./",
   "./index.html",
