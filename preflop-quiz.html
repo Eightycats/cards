@@ -136,7 +136,7 @@
 <body>
 
 <div id="scoreDisplay">
-  <div>Avg Error: — | 0 attempts</div>
+  <div>Avg Error: - | 0 attempts</div>
   <div id="allTimeDisplay" style="font-size:12px;opacity:0.7;margin-top:2px;"></div>
   <div style="margin-top:4px;"><a href="#" id="resetStatsBtn" style="font-size:11px;color:var(--text-color);opacity:0.5;">Reset Stats</a></div>
 </div>
@@ -159,24 +159,9 @@
   <div class="feedback" id="feedback"></div>
 </div>
 
+<script src="poker-data.js"></script>
 <script>
-  const ranks = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
-
-  const scores = [
-    [10,10,9,9,8,8,7,7,7,7,7,7,7],
-    [9,10,9,8,8,7,5,4,4,4,4,4,1],
-    [8,8,10,8,8,7,5,4,4,4,1,0,0],
-    [8,6,6,9,8,7,5,4,4,0,0,0,0],
-    [6,5,5,5,9,7,7,4,4,0,0,0,0],
-    [4,4,4,4,4,9,7,6,3,1,0,0,0],
-    [4,1,1,1,1,1,8,7,5,3,1,0,0],
-    [4,0,0,0,0,0,0,8,7,3,1,0,0],
-    [4,0,0,0,0,0,0,0,7,6,3,1,0],
-    [4,0,0,0,0,0,0,0,0,7,5,1,0],
-    [4,0,0,0,0,0,0,0,0,0,6,3,0],
-    [4,0,0,0,0,0,0,0,0,0,0,5,1],
-    [4,0,0,0,0,0,0,0,0,0,0,0,5]
-  ];
+  const { ranks, scores } = window.PokerData;
 
   let totalError = 0;
   let attempts = 0;
@@ -233,7 +218,7 @@
   function updateScore() {
     const sessionLine = scoreDisplay.querySelector('div');
     if (attempts === 0) {
-      sessionLine.textContent = 'Avg Error: — | 0 attempts';
+      sessionLine.textContent = 'Avg Error: - | 0 attempts';
     } else {
       const avg = (totalError / attempts).toFixed(1);
       sessionLine.textContent = `Avg Error: ${avg} | ${attempts} attempts`;
@@ -343,7 +328,7 @@
     let color, label;
     if (diff === 0) {
       color = '#28a745';
-      label = 'Exact!';
+      label = '✓';
     } else if (diff <= 1) {
       color = '#28a745';
       label = `Off by ${diff}`;
@@ -358,7 +343,7 @@
     const text = document.createElement('div');
     text.className = 'feedback-text';
     text.style.color = color;
-    text.textContent = `${label} — Correct: ${actual}`;
+    text.textContent = `${label} - Correct: ${actual}`;
 
     const numImg = document.createElement('img');
     numImg.src = `img/numbers/${actual * 10}.png`;

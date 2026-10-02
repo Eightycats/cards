@@ -1,7 +1,17 @@
-const cacheName = "card-trainer-v11";
+const cacheName = "card-trainer-v20";
 const assetsToCache = [
   "./",
   "./index.html",
+  "./poker-index.html",
+  "./poker-rfi.html",
+  "./poker-open.html",
+  "./poker.css",
+  "./poker-rules.js",
+  "./poker-drills.js",
+  "./poker-data.js",
+  "./preflop-index.html",
+  "./preflop-grid.html",
+  "./preflop-quiz.html",
   "./cards-index.html",
   "./cards.html",
   "./study.html",
@@ -59,7 +69,6 @@ const assetsToCache = [
   './img/cards/D4.png',
   './img/cards/D4_hidden.png',
   './img/cards/D5.png',
-  './img/cards/D5.webp',
   './img/cards/D5_hidden.png',
   './img/cards/D6.png',
   './img/cards/D6_hidden.png',
@@ -72,7 +81,6 @@ const assetsToCache = [
   './img/cards/DA.png',
   './img/cards/DA_hidden.png',
   './img/cards/DJ.png',
-  './img/cards/DJ.webp',
   './img/cards/DJ_hidden.png',
   './img/cards/DK.png',
   './img/cards/DK_hidden.png',
@@ -251,3 +259,10 @@ self.addEventListener("fetch", event => {
   );
 });
 
+
+self.addEventListener("activate", event => {
+  event.waitUntil(caches.keys().then(keys => Promise.all(
+    keys.filter(key => key.startsWith('card-trainer-') && key !== cacheName)
+      .map(key => caches.delete(key))
+  )));
+});

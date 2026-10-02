@@ -6,7 +6,7 @@
     { href: 'cards-index.html', label: 'Cards' },
     { href: 'numbers-index.html', label: 'Numbers' },
     { href: 'stacks-index.html', label: 'Stacks' },
-    { href: 'preflop-index.html', label: 'Preflop' },
+    { href: 'poker-index.html', label: 'Poker' },
   ];
 
   // Free, open-source typefaces from Google Fonts. The system fallbacks below
@@ -258,8 +258,14 @@
   // Build sidebar HTML
   let linksHtml = '';
   for (const link of links) {
-    const active = (link.href === currentPage) ? ' nav-active' : '';
+    const active = (link.href === currentPage || (link.href === 'poker-index.html' && /^(poker-|preflop-)/.test(currentPage))) ? ' nav-active' : '';
     linksHtml += `<a href="${link.href}" class="${active}">${link.label}</a>`;
+  }
+
+  if (/^(poker-|preflop-)/.test(currentPage)) {
+    linksHtml += `<a href="preflop-index.html" style="margin-left:20px"${currentPage.startsWith('preflop-') ? ' aria-current="page"' : ''}>Preflop</a>
+      <a href="poker-rfi.html" style="margin-left:20px">Raise First In</a>
+      <a href="poker-open.html" style="margin-left:20px">Facing an Open</a>`;
   }
 
   // Inject elements

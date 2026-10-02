@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Raise First In · Poker</title><link rel="stylesheet" href="poker.css"></head>
+<body data-mode="rfi"><main>
+<p class="breadcrumb"><a href="poker-index.html">Poker</a> / Raise First In</p>
+<h1>Raise First In</h1><p class="subtitle">Everyone has folded to you. Choose your action.<br>6-max</p>
+<p id="stats">0 hands completed</p><div class="hand" id="hand"></div><div class="hand-label" id="hand-label"></div>
+<section class="panel" aria-label="Current question"><p class="progress" id="progress"></p>
+<div id="running" class="running"></div>
+<h2 id="question" tabindex="-1"></h2><div id="context"></div><div id="answers"></div>
+<div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+<button id="next" hidden>Continue</button></section>
+<details><summary>Scoring reference</summary><div id="reference"></div>
+</details>
+</main><script src="poker-data.js"></script><script src="poker-rules.js"></script><script src="poker-drills.js"></script><script src="nav.js"></script></body></html>
