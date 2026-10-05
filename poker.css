@@ -52,3 +52,5 @@ th, td { border: 1px solid; padding: 6px; text-align: left; }
 
 .result-table .score-right { color: #204822; }
 .result-table .score-wrong { color: #852a20; font-weight: bold; }
+#drill { display: block; width: 100%; max-width: 360px; margin: 10px auto 20px; padding: 12px; font-size: 1rem; }
+.quick-score { font-size: 1.25rem; }

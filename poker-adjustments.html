@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Quick Drills · Poker</title><link rel="stylesheet" href="poker.css">
+</head>
+<body><main>
+<p class="breadcrumb"><a href="poker-index.html">Poker</a> / Quick Drills</p>
+<h1>Quick Drills</h1>
+<label for="drill">Practice</label>
+<select id="drill">
+<option value="rfi">RFI minimum score</option>
+<option value="villain">Villain opening position</option>
+<option value="hero">Hero position</option>
+<option value="size">Opening bet size</option>
+<option value="multiway">Multiway adjustment</option>
+</select>
+<p id="stats" aria-live="polite">0 / 0 correct</p>
+<section class="panel" aria-label="Practice question">
+<p id="prompt"></p><h2 id="question" tabindex="-1"></h2>
+<div id="context"></div><div id="answers" class="actions"></div>
+<div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+<button id="next" hidden>Next question</button>
+</section>
+</main>
+<script src="poker-rules.js"></script><script src="poker-adjustments.js"></script><script src="nav.js"></script>
+</body></html>

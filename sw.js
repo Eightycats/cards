@@ -1,8 +1,10 @@
-const cacheName = "card-trainer-v20";
+const cacheName = "card-trainer-v22";
 const assetsToCache = [
   "./",
   "./index.html",
   "./poker-index.html",
+  "./poker-adjustments.html",
+  "./poker-adjustments.js",
   "./poker-rfi.html",
   "./poker-open.html",
   "./poker.css",

@@ -6,6 +6,26 @@
   const money = amount => '$' + amount.toLocaleString('en-US', {minimumFractionDigits: Number.isInteger(amount) ? 0 : 2, maximumFractionDigits: 2});
   const signed = n => n > 0 ? `+${n}` : String(n);
   let hand, position, steps, step, total, ledger, answered, transitioning = false, completed = 0, correct = 0;
+  let showCalculation = true;
+  try { showCalculation = localStorage.getItem('pokerShowCalculation') !== 'false'; } catch (_) {}
+  const equationToggle = $('equation-toggle');
+  if (equationToggle) {
+    equationToggle.setAttribute('aria-pressed', String(showCalculation));
+    equationToggle.textContent = `Running calculation: ${showCalculation ? 'shown' : 'hidden'}`;
+    equationToggle.onclick = () => {
+      showCalculation = !showCalculation;
+      try { localStorage.setItem('pokerShowCalculation', String(showCalculation)); } catch (_) {}
+      equationToggle.setAttribute('aria-pressed', String(showCalculation));
+      equationToggle.textContent = `Running calculation: ${showCalculation ? 'shown' : 'hidden'}`;
+      updateRunning();
+    };
+  }
+  function sizeMath() {
+    return table(['Bet ÷ big blind', 'Size', 'Adjustment'], [[
+      `${money(hand.size * hand.bigBlind)} ÷ ${money(hand.bigBlind)} = ${hand.size}`,
+      `${hand.size} BB (${hand.size}×)`, signed(R.sizeAdjustment(hand.size))
+    ]]);
+  }
   function table(headers, rows) {
     return `<table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(row => `<tr>${row.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
   }
@@ -61,7 +81,9 @@
     $('guess').oninput = () => { $('value').textContent = $('guess').value; };
   }
   function updateRunning() {
-    $('running').hidden = mode === 'rfi' || total === null;
+    const finalResult = answered && steps[step] === 'decision';
+    $('running').hidden = mode === 'rfi' || total === null || (!showCalculation && !finalResult);
+    if (equationToggle) equationToggle.hidden = finalResult;
     $('running').innerHTML = ledger.map(({kind, value}, index) =>
       `<span class="equation-part">${index ? `<span class="operator">${value < 0 ? '−' : '+'}</span>` : ''}<span class="term"><span class="term-label">${termLabel(kind)}</span><strong>${index ? Math.abs(value) : value}</strong></span></span>`
     ).join('') + (total === null ? '' : `<span class="equation-part"><span class="operator">=</span><span class="term"><span class="term-label">Score</span><strong>${total}</strong></span></span>`);
@@ -137,10 +159,12 @@
     }
     const exact = guess === actual;
     const final = kind === 'decision' || kind === 'rfi';
+    if (final) updateRunning();
     $('feedback').className = 'feedback ' + (exact ? 'result-success' : 'result-error');
     $('feedback').innerHTML = final ? decisionResult(guess, actual, kind === 'rfi' ? base : total)
       : table(['Your choice', 'Correct', 'Result'], [[signed(guess), signed(actual), exact ? '<span aria-label="Correct">✓</span>' : `✗ Off by ${Math.abs(guess - actual)} ${guess > actual ? '(high)' : '(low)'}`]])
         + (kind === 'multiway' ? table(['Callers', 'Recovery', 'Net'], [[`-${hand.callers}`, R.recovery(hand.row, hand.col) ? '+1' : '0', signed(actual)]]) : '');
+    if (kind === 'size' || (final && mode !== 'rfi')) $('feedback').innerHTML += sizeMath();
     $('feedback').animate([{opacity:0}, {opacity:1}], {duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 160});
     $('answers').querySelectorAll('button,input').forEach(el => el.disabled = true);
     if (final) { completed++; if (exact) correct++; $('stats').textContent = `${correct} / ${completed} final decisions correct`; }
