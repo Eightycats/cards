@@ -5,6 +5,7 @@
   const positionNames = { UTG: 'Under the Gun', HJ: 'Hijack', CO: 'Cutoff', BTN: 'Button', SB: 'Small Blind', BB: 'Big Blind' };
   const money = amount => '$' + amount.toLocaleString('en-US', {minimumFractionDigits: Number.isInteger(amount) ? 0 : 2, maximumFractionDigits: 2});
   const signed = n => n > 0 ? `+${n}` : String(n);
+  let advanceTimer;
   let hand, position, steps, step, total, ledger, answered, transitioning = false, completed = 0, correct = 0;
   let showCalculation = true;
   try { showCalculation = localStorage.getItem('pokerShowCalculation') !== 'false'; } catch (_) {}
@@ -34,7 +35,7 @@
     : table(['Villain', 'Adjustment'], Object.entries(R.villain).map(([p,n]) => [p,signed(n)]))
       + table(['Hero', 'Adjustment'], Object.entries(R.hero).map(([p,n]) => [p,signed(n)]))
       + table(['Opening size', 'Adjustment'], [['2 BB or less','+1'],['2.25–2.5 BB','0'],['3 BB','−1'],['3.5 BB+','−2']])
-      + '<p>Size adjustment is based on big blinds, not the pot ratio. Each caller before Hero subtracts 1 (maximum −3). Pocket pairs, suited connectors, and suited aces recover +1 when there are callers.</p>'
+      + '<p>Size adjustment is based on big blinds, not the pot ratio. Each additional caller before Hero subtracts 1 point.</p>'
       + '<p>Final score &lt;6: FOLD · 6–8: CALL · 9+: 3-BET. Adjusted scores may be below 0 or above 10.</p>';
   function handName() {
     const high = Math.min(hand.row, hand.col), low = Math.max(hand.row, hand.col);
@@ -51,6 +52,7 @@
     $('hand-label').textContent = handName();
   }
   function start() {
+    clearTimeout(advanceTimer);
     answered = false;
     hand = R.scenario();
     document.querySelector('.subtitle').textContent = `6-max · Blinds ${money(hand.bigBlind / 2)} / ${money(hand.bigBlind)} · Stack ${money(hand.bigBlind * 100)}`;
@@ -104,7 +106,7 @@
       villain: ['Position adjustment', [['Villain', hand.villain]]],
       size: ['Raise adjustment', [['Blinds', `${money(hand.bigBlind / 2)} / ${money(hand.bigBlind)}`], ['Open', money(hand.size * hand.bigBlind)], ['Pot', money(hand.pot * hand.bigBlind)]]],
       hero: ['Position adjustment', [['Hero', hand.hero]]],
-      multiway: ['Multiway adjustment', [['Callers', hand.callers], ['Hand', handName()]]],
+      multiway: ['Multiway adjustment', [['Callers', hand.callers]]],
       decision: ['Your action?', [['Villain', hand.villain], ['Hero', hand.hero], ['Open', money(hand.size * hand.bigBlind)], ['Callers', hand.callers]]]
     };
     $('question').textContent = content[kind][0];
@@ -151,7 +153,7 @@
     } else if (kind === 'decision') {
       actual = R.action(total);
     } else {
-      const adjustments = { base, villain: R.villain[hand.villain], size: R.sizeAdjustment(hand.size), hero: R.hero[hand.hero], multiway: R.multiway(hand.row, hand.col, hand.callers) };
+      const adjustments = { base, villain: R.villain[hand.villain], size: R.sizeAdjustment(hand.size), hero: R.hero[hand.hero], multiway: R.multiway(hand.callers) };
       actual = adjustments[kind];
       total = kind === 'base' ? actual : total + actual;
       ledger.push({kind, value: actual});
@@ -163,14 +165,19 @@
     $('feedback').className = 'feedback ' + (exact ? 'result-success' : 'result-error');
     $('feedback').innerHTML = final ? decisionResult(guess, actual, kind === 'rfi' ? base : total)
       : table(['Your choice', 'Correct', 'Result'], [[signed(guess), signed(actual), exact ? '<span aria-label="Correct">✓</span>' : `✗ Off by ${Math.abs(guess - actual)} ${guess > actual ? '(high)' : '(low)'}`]])
-        + (kind === 'multiway' ? table(['Callers', 'Recovery', 'Net'], [[`-${hand.callers}`, R.recovery(hand.row, hand.col) ? '+1' : '0', signed(actual)]]) : '');
+        + (kind === 'multiway' ? table(['Additional callers', 'Adjustment'], [[hand.callers, signed(actual)]]) : '');
     if (kind === 'size' || (final && mode !== 'rfi')) $('feedback').innerHTML += sizeMath();
     $('feedback').animate([{opacity:0}, {opacity:1}], {duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 160});
     $('answers').querySelectorAll('button,input').forEach(el => el.disabled = true);
     if (final) { completed++; if (exact) correct++; $('stats').textContent = `${correct} / ${completed} final decisions correct`; }
-    $('next').textContent = final ? 'Next hand' : 'Continue'; $('next').hidden = false; $('next').focus({preventScroll:true});
+    if (mode === 'rfi') {
+      advanceTimer = setTimeout(next, 2500);
+    } else {
+      $('next').textContent = final ? 'Next hand' : 'Continue'; $('next').hidden = false; $('next').focus({preventScroll:true});
+    }
   }
-  $('next').onclick = async () => {
+  async function next() {
+    clearTimeout(advanceTimer);
     if (transitioning) return;
     transitioning = true;
     const panel = document.querySelector('.panel');
@@ -183,6 +190,7 @@
     panel.getAnimations().forEach(animation => animation.cancel());
     $('question').focus({preventScroll:true});
     transitioning = false;
-  };
+  }
+  $('next').onclick = next;
   start();
 })();

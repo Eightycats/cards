@@ -106,6 +106,49 @@
       letter-spacing: .025em;
       box-shadow: inset 0 0 0 3px rgba(122, 36, 27, .12), 3px 4px 0 rgba(66, 33, 15, .28) !important;
     }
+    input[type="range"] {
+      appearance: none;
+      -webkit-appearance: none;
+      height: 40px;
+      min-width: 0;
+      padding: 0;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      accent-color: var(--western-ink);
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 8px;
+      background: #8f7048;
+      border: 1px solid var(--western-ink);
+      border-radius: 4px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      margin-top: -9px;
+      border: 2px solid var(--western-ink);
+      border-radius: 50%;
+      background: #513c2a;
+      box-shadow: 0 1px 3px rgba(42,22,13,.3);
+    }
+    input[type="range"]::-moz-range-track {
+      height: 8px;
+      background: #8f7048;
+      border: 1px solid var(--western-ink);
+      border-radius: 4px;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--western-ink);
+      border-radius: 50%;
+      background: #513c2a;
+    }
+    input[type="range"]:focus-visible { outline: 2px solid #513c2a; outline-offset: 3px; }
+    input[type="range"]:disabled { opacity: .55; cursor: default; }
     button:hover, .menu a:hover, .filter-btn:hover, .step-btn:hover, .card-option:hover {
       background: #f2dca9 !important;
       color: var(--western-red) !important;
@@ -265,7 +308,8 @@
   if (/^(poker-|preflop-)/.test(currentPage)) {
     linksHtml += `<a href="preflop-index.html" style="margin-left:20px"${currentPage.startsWith('preflop-') ? ' aria-current="page"' : ''}>Preflop</a>
       <a href="poker-rfi.html" style="margin-left:20px">Raise First In</a>
-      <a href="poker-open.html" style="margin-left:20px">Facing an Open</a>`;
+      <a href="poker-open.html" style="margin-left:20px">Facing an Open</a>
+      <a href="poker-adjustments.html" style="margin-left:20px">Quick Drills</a>`;
   }
 
   // Inject elements

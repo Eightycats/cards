@@ -12,11 +12,9 @@
     if (size < 3.5) return -1;
     return -2;
   }
-  function recovery(row, col) {
-    return row === col || (row < col && (row === 0 || col - row === 1));
-  }
-  function multiway(row, col, callers) {
-    return callers === 0 ? 0 : -Math.min(callers, 3) + (recovery(row, col) ? 1 : 0);
+  // User rule: subtract one point per additional caller, regardless of hand type.
+  function multiway(callers) {
+    return callers === 0 ? 0 : -callers;
   }
   function rfiAction(score, position) {
     if (score >= rfi[position]) return 'RAISE';
@@ -30,7 +28,7 @@
       { kind: 'villain', value: villain[hand.villain] },
       { kind: 'size', value: sizeAdjustment(hand.size) },
       { kind: 'hero', value: hero[hand.hero] },
-      { kind: 'multiway', value: multiway(hand.row, hand.col, hand.callers) }
+      { kind: 'multiway', value: multiway(hand.callers) }
     ];
     const total = ledger.reduce((sum, term) => sum + term.value, 0);
     return { ledger, total, action: action(total) };
@@ -53,7 +51,7 @@
     return { row, col, villain: positions[villainIndex], hero: positions[heroIndex], callers, size,
       bigBlind: [2, 4, 10][pick(3)], pot: size * (1 + callers) + blindContributions };
   }
-  const rules = { positions, rfi, villain, hero, sizes, sizeAdjustment, recovery, multiway, rfiAction, action, evaluate, scenario };
+  const rules = { positions, rfi, villain, hero, sizes, sizeAdjustment, multiway, rfiAction, action, evaluate, scenario };
   if (typeof module !== 'undefined') module.exports = rules;
   else window.PokerRules = rules;
 })();

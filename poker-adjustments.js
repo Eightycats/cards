@@ -6,6 +6,7 @@
   const money = value => '$' + value.toLocaleString('en-US', {maximumFractionDigits:2});
   const pick = list => list[Math.floor(Math.random() * list.length)];
   const decks = {}, stats = {};
+  let advanceTimer;
   let mode = 'rfi', current, answered = false, transitioning = false;
   function table(headers, rows) {
     return `<table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(row => `<tr>${row.map(value => `<td>${value}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
@@ -23,6 +24,7 @@
     return decks[mode].pop();
   }
   function render() {
+    clearTimeout(advanceTimer);
     answered = false;
     const value = draw();
     current = {answer: 0, explanation: ''};
@@ -44,17 +46,10 @@
       current.explanation = table(['Bet ÷ big blind','Size','Adjustment'], [[`${money(value * bb)} ÷ ${money(bb)} = ${value}`,`${value} BB (${value}×)`,signed(current.answer)]]);
       options = [1,0,-1,-2];
     } else {
-      const hands = [
-        {label:'88',row:6,col:6}, {label:'87s',row:6,col:7},
-        {label:'A5s',row:0,col:9}, {label:'KJo',row:3,col:1},
-        {label:'97s',row:5,col:7}, {label:'87o',row:7,col:6}
-      ];
-      const hand = pick(hands);
-      $('prompt').textContent = 'Net multiway adjustment?';
-      $('question').textContent = hand.label;
-      $('context').innerHTML = table(['Callers before you'], [[value]]);
-      current.answer = R.multiway(hand.row, hand.col, value);
-      current.explanation = table(['Callers','Hand recovery','Net'], [[value ? `-${value}` : '0', value && R.recovery(hand.row,hand.col) ? '+1' : '0', signed(current.answer)]]);
+      $('prompt').textContent = 'Multiway adjustment?';
+      $('question').textContent = `${value} additional caller${value === 1 ? '' : 's'}`;
+      current.answer = R.multiway(value);
+      current.explanation = table(['Additional callers','Adjustment'], [[value, signed(current.answer)]]);
       options = [0,-1,-2,-3];
     }
     options.forEach(value => {
@@ -77,10 +72,11 @@
     const format = mode === 'rfi' ? String : signed;
     $('feedback').innerHTML = table(['Your answer','Result'], [[format(value), `<span aria-label="${correct ? 'Correct' : 'Incorrect'}">${correct ? '✓' : '✗'}</span> <strong class="quick-score">${format(current.answer)}</strong>`]]) + current.explanation;
     $('feedback').animate([{opacity:0},{opacity:1}], {duration: duration()});
-    $('next').hidden = false; $('next').focus({preventScroll:true});
+    advanceTimer = setTimeout(next, 2500);
   }
   function duration() { return matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 120; }
   async function next() {
+    clearTimeout(advanceTimer);
     if (transitioning) return;
     transitioning = true; $('drill').disabled = true;
     const panel = document.querySelector('.panel');
